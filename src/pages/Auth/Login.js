@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import openSocket from "socket.io-client";
 
 import HomePage from "../Interface/Home";
 import Scan from "../../components/Scan/Scan";
+import EnterPin from "../../components/Pin/EnterPin";
 
 function Login(props) {
   const [token, setToken] = useState("");
+  const [displayPin, setdisplayPin] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
@@ -17,8 +19,10 @@ function Login(props) {
   };
 
   const tokenHandler = (data) => {
+    console.log(data);
     setToken(data);
-    props.activeSttaus();
+    if (!data) props.activeStataus();
+    else setdisplayPin(false);
   };
 
   const submitClickHandler = async () => {
@@ -48,6 +52,8 @@ function Login(props) {
     }
   };
 
+  const fetchedUser = useRef();
+
   useEffect(() => {
     const socket = openSocket("http://localhost:5000", {
       transports: ["websocket"],
@@ -61,7 +67,8 @@ function Login(props) {
       // if (!token) {
       //   setToken(data);
       // }
-      setToken(data);
+      fetchedUser.current = data.user;
+      setdisplayPin(true);
     });
 
     socket.on("disconnect", () => {
@@ -101,7 +108,9 @@ function Login(props) {
 
   return (
     <div>
-      {token ? (
+      {displayPin ? (
+        <EnterPin user={fetchedUser.current} tokenHandler={tokenHandler} />
+      ) : token ? (
         <HomePage kioskInfo={props.kioskInfo} tokenHandler={tokenHandler} />
       ) : (
         LoginPage

@@ -45,7 +45,7 @@ function Start() {
   return (
     <>
       {active ? (
-        <LoginPage kioskInfo={kiosk} activeSttaus={toggleActive} />
+        <LoginPage kioskInfo={kiosk} activeStataus={toggleActive} />
       ) : (
         StartPage
       )}

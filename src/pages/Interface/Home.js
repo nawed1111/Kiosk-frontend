@@ -3,11 +3,11 @@ import React, { useState } from "react";
 import InstrumentPage from "./Instrument";
 
 function Home(props) {
-  const [instrument, setInstrument] = useState();
+  const [instrument, setInstrument] = useState({});
   const [selected, setSelected] = useState(false);
 
-  const instrumentHandler = (event) => {
-    setInstrument(event.target.value);
+  const instrumentHandler = (data) => {
+    setInstrument(data);
   };
 
   const submitHandler = () => {
@@ -25,10 +25,10 @@ function Home(props) {
       <input
         type="radio"
         key={`${instrument.id}${index}`}
-        value={instrument}
+        value={instrument.id}
         id={instrument.id}
         name="instrument"
-        onClick={(event) => instrumentHandler(event)}
+        onClick={instrumentHandler.bind(this, instrument)}
         disabled={instrument.loaded}
       />
       <label for={instrument.id}>{instrument.name}</label>
