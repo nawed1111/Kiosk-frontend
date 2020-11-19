@@ -19,14 +19,14 @@ function Login(props) {
   };
 
   const tokenHandler = (data) => {
-    console.log(data);
+    // console.log(data);
     setToken(data);
     if (!data) props.activeStataus();
     else setdisplayPin(false);
   };
 
   const submitClickHandler = async () => {
-    // setToken("acbjsdhvcbjsdbvsd");
+  
     try {
       const response = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
@@ -64,9 +64,6 @@ function Login(props) {
     socket.emit("joinAuthRoom", kioskId);
 
     socket.on("jwttoken", (data) => {
-      // if (!token) {
-      //   setToken(data);
-      // }
       fetchedUser.current = data.user;
       setdisplayPin(true);
     });

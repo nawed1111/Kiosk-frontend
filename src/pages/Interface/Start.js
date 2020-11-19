@@ -7,7 +7,7 @@ function Start() {
   const [kiosk, setkiosk] = useState();
 
   const clickHandler = () => {
-    if (!kiosk.id) throw new Error("Kiosk not found!");
+    if (!kiosk) throw new Error("Kiosk not found!");
     setActive(true);
     console.log("Kiosk id: ", kiosk.id);
   };
