@@ -11,6 +11,9 @@ function Instrument(props) {
   const [runTest, setRunTest] = useState(false);
   const [timestamp, setTimestamp] = useState();
 
+  const pathName = window.location.pathname;
+  const kioskId = pathName.split("/")[1];
+
   const doneClickHandler = () => {
     // console.log("samples ", samples);
     setDoneScanning(true);
@@ -20,7 +23,7 @@ function Instrument(props) {
     setTime(event.target.value);
   };
 
-  const runTestHandler = () => {
+  const runTestHandler = async () => {
     const response = window.confirm("Are you sure?");
 
     if (response) {
@@ -29,6 +32,35 @@ function Instrument(props) {
       setTimeout(() => {
         alert("Time's up");
       }, +time * 60 * 1000);
+
+      // Add to db
+      try {
+        const response = await fetch(
+          "http://localhost:5000/api/samples/run-test",
+          {
+            method: "PUT",
+            headers: {
+              // Authorization: "Bearer " + auth.token,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              // tester: userId,
+              instrument: props.instrument,
+              samples,
+              duration: time,
+              timestamp,
+              kioskId,
+            }),
+          }
+        );
+        const responseData = await response.json();
+        console.log(responseData);
+        if (!response.ok) {
+          throw new Error(responseData.message);
+        }
+      } catch (err) {
+        console.log(err);
+      }
     }
   };
 
@@ -36,8 +68,7 @@ function Instrument(props) {
     const socket = openSocket("http://localhost:5000", {
       transports: ["websocket"],
     });
-    const pathName = window.location.pathname;
-    const kioskId = pathName.split("/")[1];
+
     socket.emit("joinSampleRoom", kioskId + "-samples");
 
     socket.on("scannedSample", (data) => {
@@ -51,7 +82,7 @@ function Instrument(props) {
         console.log("Application server connected back!");
       });
     });
-  }, [samples]);
+  }, [samples, kioskId]);
 
   const renderSamples = samples.map((sample, index) => (
     <div>
@@ -98,7 +129,6 @@ function Instrument(props) {
       <p>
         Time Remaining: <Timer minutes={+time} timestamp={timestamp} />
       </p>
-      <button>Remove now</button>
       <button>Run in background</button>
     </div>
   );
