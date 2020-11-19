@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import openSocket from "socket.io-client";
 
 import Scan from "../../components/Scan/Scan";
 import Timer from "../../components/Timer/Timer";
 
 function Instrument(props) {
+  const _isMounted = useRef(true);
   const [samples, setSamples] = useState([]);
   const [doneScanning, setDoneScanning] = useState(false);
-  const [time, setTime] = useState();
+  const [time, setTime] = useState("");
   const [runTest, setRunTest] = useState(false);
   const [timestamp, setTimestamp] = useState();
 
@@ -20,6 +21,7 @@ function Instrument(props) {
   };
 
   const setTimeHandler = (event) => {
+    // event.preventDefault();
     setTime(event.target.value);
   };
 
@@ -29,6 +31,7 @@ function Instrument(props) {
     if (response) {
       setRunTest(true);
       setTimestamp(new Date().getTime());
+      console.log("Timestamp: ", timestamp);
       setTimeout(() => {
         alert("Time's up");
       }, +time * 60 * 1000);
@@ -48,7 +51,7 @@ function Instrument(props) {
               instrument: props.instrument,
               samples,
               duration: time,
-              timestamp,
+              timestamp: new Date().getTime(),
               kioskId,
             }),
           }
@@ -58,10 +61,21 @@ function Instrument(props) {
         if (!response.ok) {
           throw new Error(responseData.message);
         }
+        // if (_isMounted.current) {
+        //   const responseData = await response.json();
+        //   console.log(responseData);
+        //   if (!response.ok) {
+        //     throw new Error(responseData.message);
+        //   }
+        // }
       } catch (err) {
         console.log(err);
       }
     }
+  };
+
+  const runInBackgroundClickHandler = () => {
+    props.deSelect(false);
   };
 
   useEffect(() => {
@@ -82,10 +96,11 @@ function Instrument(props) {
         console.log("Application server connected back!");
       });
     });
+    return () => (_isMounted.current = false);
   }, [samples, kioskId]);
 
   const renderSamples = samples.map((sample, index) => (
-    <div>
+    <div key={`${sample.id}${index}`}>
       <p>
         <strong>({index + 1}) </strong>Sample ID: {sample.id}
       </p>
@@ -107,7 +122,7 @@ function Instrument(props) {
     <div>
       <h3>List of samples scanned</h3>
       {renderSamples}
-      <label for="time">Enter time: </label>
+      <label htmlFor="time">Enter time: </label>
       <input
         type="text"
         value={time}
@@ -126,10 +141,9 @@ function Instrument(props) {
       <p>Samples in test</p>
       {renderSamples}
       <p>Recommended Temperature: {props.instrument.recommendedTemperature} </p>
-      <p>
-        Time Remaining: <Timer minutes={+time} timestamp={timestamp} />
-      </p>
-      <button>Run in background</button>
+      <p>Time Remaining:</p>
+      <Timer minutes={+time} timestamp={timestamp} />
+      <button onClick={runInBackgroundClickHandler}>Run in background</button>
     </div>
   );
 

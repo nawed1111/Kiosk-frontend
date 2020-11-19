@@ -82,14 +82,14 @@ function Login(props) {
       <Scan name="ID Card" hideButton="true" />
       <p>OR</p>
       <h2>Login with your crdentials</h2>
-      <label for="username">Username: </label>
+      <label htmlFor="username">Username: </label>
       <input
         id="username"
         value={username}
         onChange={(event) => usenameChangeHandler(event)}
       />
       <p />
-      <label for="password">Password: </label>
+      <label htmlFor="password">Password: </label>
       <input
         id="password"
         type="password"

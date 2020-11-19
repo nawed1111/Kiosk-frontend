@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 const EnterPin = (props) => {
-  const [pin, setPin] = useState();
+  const [pin, setPin] = useState("");
 
   const pinInputHandler = (event) => {
     setPin(event.target.value);
@@ -36,7 +36,7 @@ const EnterPin = (props) => {
   };
   return (
     <div>
-      <label for="pin">Enter Pin </label>
+      <label htmlFor="pin">Enter Pin </label>
       <input
         type="text"
         id="pin"

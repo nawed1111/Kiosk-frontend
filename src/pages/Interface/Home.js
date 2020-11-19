@@ -4,7 +4,7 @@ import InstrumentPage from "./Instrument";
 import LoadedInstrument from "./LoadedInstrument";
 
 function Home(props) {
-  const [instrument, setInstrument] = useState({});
+  const [instrument, setInstrument] = useState();
   const [selected, setSelected] = useState(false);
   const [openLoadedInstrument, setLoadedIntrumnet] = useState({
     status: false,
@@ -33,17 +33,16 @@ function Home(props) {
   };
 
   const instruments = props.kioskInfo.instruments.map((instrument, index) => (
-    <div>
+    <div key={`${instrument.id}${index}`}>
       <input
         type="radio"
-        key={`${instrument.id}${index}`}
         value={instrument.id}
         id={instrument.id}
         name="instrument"
         onClick={instrumentHandler.bind(this, instrument)}
         disabled={instrument.loaded}
       />
-      <label for={instrument.id}>{instrument.name}</label>
+      <label htmlFor={instrument.id}>{instrument.name}</label>
       <p>Instrument status: {instrument.loaded ? "Filled" : "Empty"}</p>
       <p>
         Recommended Temperature: {instrument.recommendedTemperature} deg Celsius
@@ -77,7 +76,7 @@ function Home(props) {
         </a>
       </nav>
       {selected ? (
-        <InstrumentPage instrument={instrument} />
+        <InstrumentPage instrument={instrument} deSelect={setSelected} />
       ) : openLoadedInstrument.status ? (
         <LoadedInstrument
           instrumentId={openLoadedInstrument.instrumentId}
