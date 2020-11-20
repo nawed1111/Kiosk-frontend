@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 const EnterPin = (props) => {
-  const [pin, setPin] = useState();
+  const [pin, setPin] = useState("");
 
   const pinInputHandler = (event) => {
     setPin(event.target.value);
@@ -29,14 +29,17 @@ const EnterPin = (props) => {
       }
       // auth.login(responseData.userId, responseData.token);
       // console.log(responseData.token);
-      props.tokenHandler(responseData.token);
+      props.tokenHandler({
+        token: responseData.token,
+        userId: responseData.userId,
+      });
     } catch (err) {
       console.log(err);
     }
   };
   return (
     <div>
-      <label for="pin">Enter Pin </label>
+      <label htmlFor="pin">Enter Pin </label>
       <input
         type="text"
         id="pin"
