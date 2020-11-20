@@ -1,12 +1,14 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import openSocket from "socket.io-client";
+
+import { AuthContext } from "../../context/auth-context";
 
 import HomePage from "../Interface/Home";
 import Scan from "../../components/Scan/Scan";
 import EnterPin from "../../components/Pin/EnterPin";
 
 function Login(props) {
-  const [token, setToken] = useState("");
+  const auth = useContext(AuthContext);
   const [displayPin, setdisplayPin] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -20,13 +22,18 @@ function Login(props) {
 
   const tokenHandler = (data) => {
     // console.log(data);
-    setToken(data);
-    if (!data) props.activeStataus();
-    else setdisplayPin(false);
+    if (Object.keys(data).length === 0) {
+      auth.logout();
+      props.activeStataus();
+    } else {
+      if (!auth.isLoggedIn) {
+        auth.login(data.userId, data.token);
+        setdisplayPin(false);
+      }
+    }
   };
 
   const submitClickHandler = async () => {
-  
     try {
       const response = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
@@ -45,8 +52,12 @@ function Login(props) {
         alert("Invalid Login");
         throw new Error(responseData.message);
       }
-      // auth.login(responseData.userId, responseData.token);
-      setToken(responseData.token);
+      auth.login(responseData.userId, responseData.token);
+      // setToken(responseData.token);
+      // if (auth.isLoggedIn) {
+      //   setUsername("");
+      //   setPassword("");
+      // }
     } catch (err) {
       console.log(err);
     }
@@ -107,8 +118,8 @@ function Login(props) {
     <div>
       {displayPin ? (
         <EnterPin user={fetchedUser.current} tokenHandler={tokenHandler} />
-      ) : token ? (
-        <HomePage kioskInfo={props.kioskInfo} tokenHandler={tokenHandler} />
+      ) : auth.isLoggedIn ? (
+        <HomePage kioskId={props.kioskId} tokenHandler={tokenHandler} />
       ) : (
         LoginPage
       )}

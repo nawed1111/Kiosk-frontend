@@ -29,7 +29,10 @@ const EnterPin = (props) => {
       }
       // auth.login(responseData.userId, responseData.token);
       // console.log(responseData.token);
-      props.tokenHandler(responseData.token);
+      props.tokenHandler({
+        token: responseData.token,
+        userId: responseData.userId,
+      });
     } catch (err) {
       console.log(err);
     }

@@ -1,11 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useContext } from "react";
+
+import { AuthContext } from "../../context/auth-context";
 
 import InstrumentPage from "./Instrument";
 import LoadedInstrument from "./LoadedInstrument";
 
 function Home(props) {
+  const auth = useContext(AuthContext);
   const [instrument, setInstrument] = useState();
   const [selected, setSelected] = useState(false);
+  const [intrumentsofKiosk, setInstrumentsOfKiosk] = useState([]);
+
   const [openLoadedInstrument, setLoadedIntrumnet] = useState({
     status: false,
     instrumentId: "",
@@ -29,10 +34,33 @@ function Home(props) {
   };
 
   const logoutHandler = () => {
-    props.tokenHandler("");
+    props.tokenHandler({});
   };
 
-  const instruments = props.kioskInfo.instruments.map((instrument, index) => (
+  useEffect(() => {
+    async function helper() {
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/instruments/${props.kioskId}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: "Bearer " + auth.token,
+            },
+          }
+        );
+        const responseData = await response.json();
+        // console.log(responseData);
+        setInstrumentsOfKiosk(responseData.instruments);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+
+    helper();
+  }, [auth.token, props.kioskId]);
+
+  const instruments = intrumentsofKiosk.map((instrument, index) => (
     <div key={`${instrument.id}${index}`}>
       <input
         type="radio"
@@ -71,7 +99,7 @@ function Home(props) {
   return (
     <>
       <nav>
-        <a href={`/${props.kioskInfo.id}`} onClick={logoutHandler}>
+        <a href={`/${props.kioskId}`} onClick={logoutHandler}>
           Logout
         </a>
       </nav>
