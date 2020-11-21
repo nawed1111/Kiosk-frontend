@@ -27,7 +27,7 @@ function Login(props) {
       props.activeStataus();
     } else {
       if (!auth.isLoggedIn) {
-        auth.login(data.userId, data.token);
+        auth.login(data.user, data.token);
         setdisplayPin(false);
       }
     }
@@ -52,12 +52,12 @@ function Login(props) {
         alert("Invalid Login");
         throw new Error(responseData.message);
       }
-      auth.login(responseData.userId, responseData.token);
+      auth.login(responseData.user, responseData.token);
       // setToken(responseData.token);
-      // if (auth.isLoggedIn) {
-      //   setUsername("");
-      //   setPassword("");
-      // }
+      if (response.ok) {
+        setUsername("");
+        setPassword("");
+      }
     } catch (err) {
       console.log(err);
     }

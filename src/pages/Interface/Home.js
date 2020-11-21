@@ -3,29 +3,29 @@ import React, { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../../context/auth-context";
 
 import InstrumentPage from "./Instrument";
-import LoadedInstrument from "./LoadedInstrument";
+import RemoveSamplesFromInstrumentPage from "./RemoveSamplesFromInstrument";
+import Timer from "../../components/Timer/Timer";
 
 function Home(props) {
   const auth = useContext(AuthContext);
   const [instrument, setInstrument] = useState();
   const [selected, setSelected] = useState(false);
-  const [intrumentsofKiosk, setInstrumentsOfKiosk] = useState([]);
+  const [instrumentsofKiosk, setInstrumentsOfKiosk] = useState({
+    emptyInstruments: [],
+    filledInstruments: [],
+  });
 
-  const [openLoadedInstrument, setLoadedIntrumnet] = useState({
+  const [openLoadedInstrument, setLoadedIntrument] = useState({
     status: false,
-    instrumentId: "",
+    instrumentId: null,
   });
 
   const instrumentHandler = (data) => {
     setInstrument(data);
   };
 
-  const toggleOpenLoadedInstrument = () => {
-    setLoadedIntrumnet({ status: false });
-  };
-
   const openLoadedInstrumentHandler = (instrumentId) => {
-    setLoadedIntrumnet({ status: true, instrumentId });
+    setLoadedIntrument({ status: !openLoadedInstrument.status, instrumentId });
   };
   const submitHandler = () => {
     if (instrument) {
@@ -38,61 +38,101 @@ function Home(props) {
   };
 
   useEffect(() => {
-    async function helper() {
-      try {
-        const response = await fetch(
-          `http://localhost:5000/api/instruments/${props.kioskId}`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: "Bearer " + auth.token,
-            },
-          }
-        );
-        const responseData = await response.json();
-        // console.log(responseData);
-        setInstrumentsOfKiosk(responseData.instruments);
-      } catch (err) {
-        console.log(err);
+    if (!selected) {
+      async function helper() {
+        try {
+          const response = await fetch(
+            `http://localhost:5000/api/instruments/${props.kioskId}`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: "Bearer " + auth.token,
+              },
+            }
+          );
+          const responseData = await response.json();
+          // console.log(responseData);
+          setInstrumentsOfKiosk({
+            emptyInstruments: responseData.instruments,
+            filledInstruments: responseData.testsRunning,
+          });
+          // console.log(responseData.testsRunning);
+        } catch (err) {
+          console.log(err);
+        }
       }
+      helper();
     }
+  }, [auth.token, props.kioskId, selected, openLoadedInstrument]);
 
-    helper();
-  }, [auth.token, props.kioskId]);
+  const EmptyInstruments = instrumentsofKiosk.emptyInstruments.map(
+    (instrument, index) => (
+      <div key={`${instrument.id}${index}`}>
+        <input
+          type="radio"
+          value={instrument.id}
+          id={instrument.id}
+          name="instrument"
+          onClick={instrumentHandler.bind(this, instrument)}
+          // disabled={instrument.filled}
+        />
+        <label htmlFor={instrument.id}>{instrument.id}</label>
+        <p>Instrument status: {instrument.filled ? "Filled" : "Empty"}</p>
+        <p>
+          Recommended Temperature: {instrument.recommendedTemperature} deg
+          Celsius
+        </p>
+        {/* <button
+          hidden={!instrument.filled}
+          onClick={openLoadedInstrumentHandler.bind(this, instrument.id)}
+        >
+          Remove now
+        </button> */}
+      </div>
+    )
+  );
 
-  const instruments = intrumentsofKiosk.map((instrument, index) => (
-    <div key={`${instrument.id}${index}`}>
-      <input
-        type="radio"
-        value={instrument.id}
-        id={instrument.id}
-        name="instrument"
-        onClick={instrumentHandler.bind(this, instrument)}
-        disabled={instrument.loaded}
-      />
-      <label htmlFor={instrument.id}>{instrument.name}</label>
-      <p>Instrument status: {instrument.loaded ? "Filled" : "Empty"}</p>
-      <p>
-        Recommended Temperature: {instrument.recommendedTemperature} deg Celsius
-      </p>
-      <p>Description: {instrument.description} </p>
-      <button
-        hidden={!instrument.loaded}
-        onClick={openLoadedInstrumentHandler.bind(this, instrument.id)}
-      >
-        Remove now
-      </button>
-    </div>
-  ));
+  const FilledInstruments = instrumentsofKiosk.filledInstruments.map(
+    (test, index) => (
+      <div key={`${test.id}${index}`}>
+        <p>Instrument Id: {test.instrumentId}</p>
+        <p>Number of samples: {test.samples.length} </p>
+        {/* {test.samples.map((sample, index) => (
+          <div key={`${sample._id}${index}`}>
+            <p>
+              {`(${index + 1})`}Sample Name: {sample.name}
+            </p>
+            <p>Sample ID: {sample.id}</p>
+          </div>
+        ))} */}
+        <p>Test duration: {test.duration}</p>
+        <p>Test Started: {test.doneOn}</p>
+        <p>Time remaining: </p>
+        <Timer minutes={test.duration} timestamp={test.timestamp} />
+        <p>Test done by: {test.doneBy}</p>
+        <button
+          onClick={openLoadedInstrumentHandler.bind(this, test.instrumentId)}
+        >
+          Remove Now
+        </button>
+      </div>
+    )
+  );
 
   const HomePage = (
     <div>
-      <h1>Connected Instruments</h1>
-      {instruments}
+      <h1>Connected Instruments </h1>
+      <h2>Instruments Empty: {instrumentsofKiosk.emptyInstruments.length}</h2>
+      {EmptyInstruments}
       <p />
       <button disabled={!instrument} onClick={submitHandler}>
         Submit
       </button>
+      <h2>
+        Instruments Running Test: {instrumentsofKiosk.filledInstruments.length}
+      </h2>
+      {FilledInstruments}
+      <p />
     </div>
   );
 
@@ -106,9 +146,16 @@ function Home(props) {
       {selected ? (
         <InstrumentPage instrument={instrument} deSelect={setSelected} />
       ) : openLoadedInstrument.status ? (
-        <LoadedInstrument
-          instrumentId={openLoadedInstrument.instrumentId}
-          returnHome={toggleOpenLoadedInstrument}
+        <RemoveSamplesFromInstrumentPage
+          kioskId={props.kioskId}
+          loadedInstrumentInfo={{
+            instrumentId: openLoadedInstrument.instrumentId,
+            test: instrumentsofKiosk.filledInstruments.find(
+              (test) => test.instrumentId === openLoadedInstrument.instrumentId
+            ),
+          }}
+          stayAtLoadedInstrumentPage={setLoadedIntrument}
+          updateHomePage={openLoadedInstrumentHandler}
         />
       ) : (
         HomePage

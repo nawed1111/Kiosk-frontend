@@ -9,13 +9,13 @@ import ErrorPage from "./pages/Interface/Error";
 import { useAuth } from "./hooks/auth-hook";
 
 function App() {
-  const { token, userId, login, logout } = useAuth(); //custom useAuth hook
+  const { token, user, login, logout } = useAuth(); //custom useAuth hook
   return (
     <AuthContext.Provider
       value={{
         isLoggedIn: !!token,
         token: token,
-        userId: userId,
+        user: user,
         login: login,
         logout: logout,
       }}
