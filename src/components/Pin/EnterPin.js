@@ -31,7 +31,7 @@ const EnterPin = (props) => {
       // console.log(responseData.token);
       props.tokenHandler({
         token: responseData.token,
-        userId: responseData.userId,
+        user: responseData.user,
       });
     } catch (err) {
       console.log(err);

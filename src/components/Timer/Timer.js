@@ -41,13 +41,10 @@ function Timer(props) {
       </span>
     );
   });
-  // const TimeUp = () => {
-  //   return alert("Time's up! Remove sample/s");
-  // };
 
   return (
     <div>
-      {timerComponents.length ? timerComponents : <span>Time's Up </span>}
+      {timerComponents.length ? timerComponents : <span>Test Completed</span>}
     </div>
   );
 }

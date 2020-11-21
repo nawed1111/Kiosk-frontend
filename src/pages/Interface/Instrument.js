@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import openSocket from "socket.io-client";
 
 import Scan from "../../components/Scan/Scan";
 import Timer from "../../components/Timer/Timer";
+import { AuthContext } from "../../context/auth-context";
 
 function Instrument(props) {
+  const auth = useContext(AuthContext);
   const _isMounted = useRef(true);
   const [samples, setSamples] = useState([]);
   const [doneScanning, setDoneScanning] = useState(false);
@@ -31,7 +33,6 @@ function Instrument(props) {
     if (response) {
       setRunTest(true);
       setTimestamp(new Date().getTime());
-      console.log("Timestamp: ", timestamp);
       setTimeout(() => {
         alert("Time's up");
       }, +time * 60 * 1000);
@@ -43,21 +44,21 @@ function Instrument(props) {
           {
             method: "PUT",
             headers: {
-              // Authorization: "Bearer " + auth.token,
+              Authorization: "Bearer " + auth.token,
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              // tester: userId,
-              instrument: props.instrument,
+              instrumentId: props.instrument.id,
               samples,
               duration: time,
               timestamp: new Date().getTime(),
               kioskId,
+              user: auth.user.username,
             }),
           }
         );
         const responseData = await response.json();
-        console.log(responseData);
+        // console.log(responseData);
         if (!response.ok) {
           throw new Error(responseData.message);
         }
