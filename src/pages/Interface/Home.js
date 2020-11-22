@@ -39,7 +39,7 @@ function Home(props) {
     props.tokenHandler({});
   };
 
-  const runTestInBackgroundHnadler = () => {
+  const gobackToHomePage = () => {
     setSelected(false);
     setInstrument(null);
   };
@@ -153,7 +153,7 @@ function Home(props) {
       {selected ? (
         <InstrumentPage
           instrument={instrument}
-          deSelect={runTestInBackgroundHnadler}
+          deSelect={gobackToHomePage}
         />
       ) : openLoadedInstrument.status ? (
         <RemoveSamplesFromInstrumentPage
