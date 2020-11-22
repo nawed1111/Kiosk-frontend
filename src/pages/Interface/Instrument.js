@@ -53,7 +53,7 @@ function Instrument(props) {
               duration: time,
               timestamp: new Date().getTime(),
               kioskId,
-              user: auth.user.username,
+              user: auth.user,
             }),
           }
         );
