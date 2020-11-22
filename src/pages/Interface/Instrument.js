@@ -10,7 +10,7 @@ function Instrument(props) {
   const _isMounted = useRef(true);
   const [samples, setSamples] = useState([]);
   const [doneScanning, setDoneScanning] = useState(false);
-  const [time, setTime] = useState("");
+  const [time, setTime] = useState();
   const [runTest, setRunTest] = useState(false);
   const [timestamp, setTimestamp] = useState();
 
@@ -19,7 +19,7 @@ function Instrument(props) {
 
   const doneClickHandler = () => {
     // console.log("samples ", samples);
-    setDoneScanning(true);
+    setDoneScanning(!doneScanning);
   };
 
   const setTimeHandler = (event) => {
@@ -53,7 +53,7 @@ function Instrument(props) {
               duration: time,
               timestamp: new Date().getTime(),
               kioskId,
-              user: auth.user.username,
+              user: auth.user,
             }),
           }
         );
@@ -62,20 +62,13 @@ function Instrument(props) {
         if (!response.ok) {
           throw new Error(responseData.message);
         }
-        // if (_isMounted.current) {
-        //   const responseData = await response.json();
-        //   console.log(responseData);
-        //   if (!response.ok) {
-        //     throw new Error(responseData.message);
-        //   }
-        // }
       } catch (err) {
         console.log(err);
       }
     }
   };
 
-  const runInBackgroundClickHandler = () => {
+  const goBackToHomePage = () => {
     props.deSelect(false);
   };
 
@@ -115,7 +108,10 @@ function Instrument(props) {
       {props.instrument.loaded ? undefined : <Scan name="Samples" />}
       <h4>Scanned Samples: </h4>
       {renderSamples}
-      <button onClick={doneClickHandler}>Done</button>
+      <button onClick={goBackToHomePage}>Go Back</button>
+      <button disabled={samples.length === 0} onClick={doneClickHandler}>
+        Done
+      </button>
     </div>
   );
 
@@ -123,14 +119,17 @@ function Instrument(props) {
     <div>
       <h3>List of samples scanned</h3>
       {renderSamples}
-      <label htmlFor="time">Enter time: </label>
+      <label htmlFor="time">Enter time in minutes: </label>
       <input
         type="text"
         value={time}
         id="time"
         onChange={(event) => setTimeHandler(event)}
       />
-      <button onClick={runTestHandler}>Run Test</button>
+      <button disabled={isNaN(time) || +time <= 0} onClick={runTestHandler}>
+        Run Test
+      </button>
+      <button onClick={doneClickHandler}>Go Back</button>
     </div>
   );
 
@@ -144,7 +143,7 @@ function Instrument(props) {
       <p>Recommended Temperature: {props.instrument.recommendedTemperature} </p>
       <p>Time Remaining:</p>
       <Timer minutes={+time} timestamp={timestamp} />
-      <button onClick={runInBackgroundClickHandler}>Run in background</button>
+      <button onClick={goBackToHomePage}>Run in background</button>
     </div>
   );
 

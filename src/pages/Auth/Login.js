@@ -111,6 +111,8 @@ function Login(props) {
       <button onClick={submitClickHandler} disabled={!username || !password}>
         Login
       </button>
+
+      <a href={`/${props.kioskId}`}>Go Back</a>
     </div>
   );
 

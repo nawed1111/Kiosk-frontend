@@ -8,7 +8,7 @@ import Timer from "../../components/Timer/Timer";
 
 function Home(props) {
   const auth = useContext(AuthContext);
-  const [instrument, setInstrument] = useState();
+  const [instrument, setInstrument] = useState(null);
   const [selected, setSelected] = useState(false);
   const [instrumentsofKiosk, setInstrumentsOfKiosk] = useState({
     emptyInstruments: [],
@@ -26,6 +26,8 @@ function Home(props) {
 
   const openLoadedInstrumentHandler = (instrumentId) => {
     setLoadedIntrument({ status: !openLoadedInstrument.status, instrumentId });
+    setSelected(false);
+    setInstrument(null);
   };
   const submitHandler = () => {
     if (instrument) {
@@ -35,6 +37,11 @@ function Home(props) {
 
   const logoutHandler = () => {
     props.tokenHandler({});
+  };
+
+  const gobackToHomePage = () => {
+    setSelected(false);
+    setInstrument(null);
   };
 
   useEffect(() => {
@@ -144,7 +151,10 @@ function Home(props) {
         </a>
       </nav>
       {selected ? (
-        <InstrumentPage instrument={instrument} deSelect={setSelected} />
+        <InstrumentPage
+          instrument={instrument}
+          deSelect={gobackToHomePage}
+        />
       ) : openLoadedInstrument.status ? (
         <RemoveSamplesFromInstrumentPage
           kioskId={props.kioskId}
