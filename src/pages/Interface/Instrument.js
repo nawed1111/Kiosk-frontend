@@ -24,8 +24,29 @@ function Instrument(props) {
   };
 
   const setTimeHandler = (event) => {
-    // event.preventDefault();
+    event.preventDefault();
     setTime(event.target.value);
+  };
+
+  const addSampleInputSubmitHandler = async (event) => {
+    event.preventDefault();
+    const {
+      target: { id, name },
+    } = event;
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/samples/${kioskId}/${id.value}`
+      );
+      const responseData = await response.json();
+      if (!response.ok) {
+        throw new Error(responseData.message);
+      }
+      console.log(responseData);
+      setSamples(samples.concat({ id: id.value, name: name.value }));
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const runTestHandler = async () => {
@@ -38,7 +59,6 @@ function Instrument(props) {
         alert("Time's up");
       }, +time * 60 * 1000);
 
-      // Add to db
       try {
         const response = await fetch(
           "http://localhost:5000/api/samples/run-test",
@@ -100,6 +120,18 @@ function Instrument(props) {
       <h3> ID: {props.instrument.id} </h3>
       {props.instrument.loaded ? undefined : <Scan name="Samples" />}
       <h4>Scanned Samples: </h4>
+      <p>OR</p>
+      <form onSubmit={(event) => addSampleInputSubmitHandler(event)}>
+        <label>
+          Sample ID:
+          <input type="text" name="id" required />
+        </label>
+        <label>
+          Sample Name:
+          <input type="text" name="name" required />
+        </label>
+        <input type="submit" value="Submit" />
+      </form>
       {renderSamples}
       <button onClick={goBackToHomePage}>Go Back</button>
       <button disabled={samples.length === 0} onClick={doneClickHandler}>
