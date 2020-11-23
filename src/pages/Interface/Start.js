@@ -23,7 +23,6 @@ function Start() {
     } catch (err) {
       console.log(err);
     }
-    // console.log("Kiosk id: ", kiosk.id);
   };
 
   const toggleActive = () => {

@@ -27,8 +27,6 @@ const EnterPin = (props) => {
         alert("Invalid Login");
         throw new Error(responseData.message);
       }
-      // auth.login(responseData.userId, responseData.token);
-      // console.log(responseData.token);
       props.tokenHandler({
         token: responseData.token,
         user: responseData.user,
@@ -41,7 +39,7 @@ const EnterPin = (props) => {
     <div>
       <label htmlFor="pin">Enter Pin </label>
       <input
-        type="text"
+        type="password"
         id="pin"
         value={pin}
         onChange={(event) => pinInputHandler(event)}

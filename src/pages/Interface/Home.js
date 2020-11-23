@@ -81,20 +81,10 @@ function Home(props) {
           id={instrument.id}
           name="instrument"
           onClick={instrumentHandler.bind(this, instrument)}
-          // disabled={instrument.filled}
         />
         <label htmlFor={instrument.id}>{instrument.id}</label>
         <p>Instrument status: {instrument.filled ? "Filled" : "Empty"}</p>
-        <p>
-          Recommended Temperature: {instrument.recommendedTemperature} deg
-          Celsius
-        </p>
-        {/* <button
-          hidden={!instrument.filled}
-          onClick={openLoadedInstrumentHandler.bind(this, instrument.id)}
-        >
-          Remove now
-        </button> */}
+        <p>Recommended Temperature: {instrument.recommendedTemperature}C</p>
       </div>
     )
   );
@@ -104,14 +94,6 @@ function Home(props) {
       <div key={`${test.id}${index}`}>
         <p>Instrument Id: {test.instrumentId}</p>
         <p>Number of samples: {test.samples.length} </p>
-        {/* {test.samples.map((sample, index) => (
-          <div key={`${sample._id}${index}`}>
-            <p>
-              {`(${index + 1})`}Sample Name: {sample.name}
-            </p>
-            <p>Sample ID: {sample.id}</p>
-          </div>
-        ))} */}
         <p>Test duration: {test.duration}</p>
         <p>Test Started: {test.doneOn}</p>
         <p>Time remaining: </p>
@@ -151,10 +133,7 @@ function Home(props) {
         </a>
       </nav>
       {selected ? (
-        <InstrumentPage
-          instrument={instrument}
-          deSelect={gobackToHomePage}
-        />
+        <InstrumentPage instrument={instrument} deSelect={gobackToHomePage} />
       ) : openLoadedInstrument.status ? (
         <RemoveSamplesFromInstrumentPage
           kioskId={props.kioskId}
