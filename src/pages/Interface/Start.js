@@ -30,28 +30,6 @@ function Start() {
     setActive(!active);
   };
 
-  // useEffect(() => {
-  //   // console.log(kioskId);
-
-  //   async function helper() {
-  //     try {
-  //       const response = await fetch(
-  //         `http://localhost:5000/api/kiosks/${kioskId}`,
-  //         {
-  //           method: "GET",
-  //         }
-  //       );
-  //       const responseData = await response.json();
-  //       console.log(responseData.kioskId);
-  //       setkiosk(responseData.kioskId);
-  //     } catch (err) {
-  //       console.log(err);
-  //     }
-  //   }
-
-  //   helper();
-  // }, []);
-
   const StartPage = <button onClick={clickHandler}>Click to start</button>;
 
   return (
