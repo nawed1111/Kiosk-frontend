@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
-import openSocket from "socket.io-client";
 
 import { AuthContext } from "../../context/auth-context";
+import { getSocket } from "../../util/socket";
 
 import HomePage from "../Interface/Home";
 import Scan from "../../components/Scan/Scan";
@@ -66,13 +66,9 @@ function Login(props) {
   const fetchedUser = useRef();
 
   useEffect(() => {
-    const socket = openSocket("http://localhost:5000", {
-      transports: ["websocket"],
-    });
-    const pathName = window.location.pathname;
-    const kioskId = pathName.split("/")[1];
+    const socket = getSocket();
 
-    socket.emit("joinAuthRoom", kioskId);
+    socket.emit("joinAuthRoom", props.kioskId);
 
     socket.on("jwttoken", (data) => {
       fetchedUser.current = data.user;
@@ -82,11 +78,11 @@ function Login(props) {
     socket.on("disconnect", () => {
       console.log("Application server disconnected!");
       socket.on("connect", () => {
-        socket.emit("joinAuthRoom", kioskId);
+        socket.emit("joinAuthRoom", props.kioskId);
         console.log("Application server connected back!");
       });
     });
-  }, []);
+  }, [props.kioskId]);
 
   const LoginPage = (
     <div>

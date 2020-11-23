@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
-import openSocket from "socket.io-client";
+
+import { getSocket } from "../../util/socket";
 
 import Scan from "../../components/Scan/Scan";
 import Timer from "../../components/Timer/Timer";
@@ -73,25 +74,17 @@ function Instrument(props) {
   };
 
   useEffect(() => {
-    const socket = openSocket("http://localhost:5000", {
-      transports: ["websocket"],
-    });
+    const socket = getSocket();
 
-    socket.emit("joinSampleRoom", kioskId + "-samples");
-
-    socket.on("scannedSample", (data) => {
-      setSamples(samples.concat(data));
-    });
-
-    socket.on("disconnect", () => {
-      console.log("Application server disconnected!");
-      socket.on("connect", () => {
-        socket.emit("joinSampleRoom", kioskId + "-samples");
-        console.log("Application server connected back!");
+    if (!doneScanning) {
+      //bug
+      socket.on("scannedSample", (data) => {
+        setSamples(samples.concat(data));
       });
-    });
+    }
+
     return () => (_isMounted.current = false);
-  }, [samples, kioskId]);
+  }, [samples, doneScanning]);
 
   const renderSamples = samples.map((sample, index) => (
     <div key={`${sample.id}${index}`}>
@@ -119,6 +112,7 @@ function Instrument(props) {
     <div>
       <h3>List of samples scanned</h3>
       {renderSamples}
+      <p>Want to add more samples? Go Back </p>
       <label htmlFor="time">Enter time in minutes: </label>
       <input
         type="text"
