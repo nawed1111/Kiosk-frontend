@@ -1,17 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 
 import LoginPage from "../Auth/Login";
+import { AuthContext } from "../../context/auth-context";
 
 const pathName = window.location.pathname;
-const kioskId = pathName.split("/")[1];
+
+if (!localStorage.getItem("kioskId")) {
+  localStorage.setItem("kioskId", pathName.split("/")[1]);
+}
+
+const _KIOSK_ID = localStorage.getItem("kioskId");
 
 function Start() {
+  const auth = useContext(AuthContext);
   const [active, setActive] = useState(false);
 
   const clickHandler = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/kiosks/${kioskId}`,
+        `http://localhost:5000/api/kiosks/${_KIOSK_ID}`,
         {
           method: "GET",
         }
@@ -33,8 +40,8 @@ function Start() {
 
   return (
     <>
-      {active ? (
-        <LoginPage kioskId={kioskId} activeStataus={toggleActive} />
+      {active || auth.isLoggedIn ? (
+        <LoginPage activeStataus={toggleActive} />
       ) : (
         StartPage
       )}

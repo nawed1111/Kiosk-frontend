@@ -5,6 +5,9 @@ import { AuthContext } from "../../context/auth-context";
 import InstrumentPage from "./Instrument";
 import RemoveSamplesFromInstrumentPage from "./RemoveSamplesFromInstrument";
 import Timer from "../../components/Timer/Timer";
+import { Link } from "react-router-dom";
+
+const _KIOSK_ID = localStorage.getItem("kioskId");
 
 function Home(props) {
   const auth = useContext(AuthContext);
@@ -49,7 +52,7 @@ function Home(props) {
       async function helper() {
         try {
           const response = await fetch(
-            `http://localhost:5000/api/instruments/${props.kioskId}`,
+            `http://localhost:5000/api/instruments/${_KIOSK_ID}`,
             {
               method: "GET",
               headers: {
@@ -59,6 +62,9 @@ function Home(props) {
           );
           const responseData = await response.json();
           // console.log(responseData);
+          if (!response.ok) {
+            throw new Error(responseData.message);
+          }
           setInstrumentsOfKiosk({
             emptyInstruments: responseData.instruments,
             filledInstruments: responseData.testsRunning,
@@ -70,7 +76,7 @@ function Home(props) {
       }
       helper();
     }
-  }, [auth.token, props.kioskId, selected, openLoadedInstrument]);
+  }, [auth.token, selected, openLoadedInstrument]);
 
   const EmptyInstruments = instrumentsofKiosk.emptyInstruments.map(
     (instrument, index) => (
@@ -128,15 +134,19 @@ function Home(props) {
   return (
     <>
       <nav>
-        <a href={`/${props.kioskId}`} onClick={logoutHandler}>
+        <a href={`/${_KIOSK_ID}`} onClick={logoutHandler}>
           Logout
         </a>
+        {auth.user.role === "admin" ? (
+          <Link to={`/${_KIOSK_ID}/admin`}>
+            <button>Dashboard</button>
+          </Link>
+        ) : undefined}
       </nav>
       {selected ? (
         <InstrumentPage instrument={instrument} deSelect={gobackToHomePage} />
       ) : openLoadedInstrument.status ? (
         <RemoveSamplesFromInstrumentPage
-          kioskId={props.kioskId}
           loadedInstrumentInfo={{
             instrumentId: openLoadedInstrument.instrumentId,
             test: instrumentsofKiosk.filledInstruments.find(

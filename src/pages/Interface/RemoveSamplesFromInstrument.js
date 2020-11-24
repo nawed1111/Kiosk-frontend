@@ -3,6 +3,8 @@ import FilledInstrument from "../../components/Instrument/FilledInstrument";
 
 import { AuthContext } from "../../context/auth-context";
 
+const _KIOSK_ID = localStorage.getItem("kioskId");
+
 function RemoveSamplesFromInstrument(props) {
   const auth = useContext(AuthContext);
 
@@ -19,7 +21,7 @@ function RemoveSamplesFromInstrument(props) {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              kioskId: props.kioskId,
+              kioskId: _KIOSK_ID,
               instrumentId: props.loadedInstrumentInfo.instrumentId,
             }),
           }
