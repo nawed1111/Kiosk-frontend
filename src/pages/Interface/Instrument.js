@@ -88,7 +88,7 @@ function Instrument(props) {
   };
 
   const goBackToHomePage = () => {
-    props.deSelect(false);
+    props.deSelect();
   };
 
   useEffect(() => {
@@ -101,7 +101,10 @@ function Instrument(props) {
       });
     }
 
-    return () => (_isMounted.current = false);
+    return () => {
+      _isMounted.current = false;
+      socket.off("scannedSample");
+    };
   }, [samples, doneScanning]);
 
   const renderSamples = samples.map((sample, index) => (

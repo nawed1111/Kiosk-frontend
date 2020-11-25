@@ -8,8 +8,6 @@ import ErrorPage from "./pages/Interface/Error";
 
 import { useAuth } from "./hooks/auth-hook";
 
-import DashboardPage from "./pages/Dashboard/Dashboard";
-
 function App() {
   const { token, user, login, logout } = useAuth(); //custom useAuth hook
 
@@ -27,9 +25,6 @@ function App() {
         <Switch>
           <Route exact path="/:kid">
             <StartPage />
-          </Route>
-          <Route exact path="/:kid/admin">
-            <DashboardPage />
           </Route>
           <Route path="/">
             <ErrorPage />

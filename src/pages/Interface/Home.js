@@ -6,6 +6,7 @@ import InstrumentPage from "./Instrument";
 import RemoveSamplesFromInstrumentPage from "./RemoveSamplesFromInstrument";
 import Timer from "../../components/Timer/Timer";
 import { Link } from "react-router-dom";
+import DashboardPage from "../Dashboard/Dashboard";
 
 const _KIOSK_ID = localStorage.getItem("kioskId");
 
@@ -13,6 +14,8 @@ function Home(props) {
   const auth = useContext(AuthContext);
   const [instrument, setInstrument] = useState(null);
   const [selected, setSelected] = useState(false);
+  const [openDashBoard, setOpenDashBoard] = useState(false);
+
   const [instrumentsofKiosk, setInstrumentsOfKiosk] = useState({
     emptyInstruments: [],
     filledInstruments: [],
@@ -22,6 +25,10 @@ function Home(props) {
     status: false,
     instrumentId: null,
   });
+
+  const openDashBoardClickHandler = () => {
+    setOpenDashBoard(!openDashBoard);
+  };
 
   const instrumentHandler = (data) => {
     setInstrument(data);
@@ -138,12 +145,12 @@ function Home(props) {
           Logout
         </a>
         {auth.user.role === "admin" ? (
-          <Link to={`/${_KIOSK_ID}/admin`}>
-            <button>Dashboard</button>
-          </Link>
+          <button onClick={openDashBoardClickHandler}>Dashboard</button>
         ) : undefined}
       </nav>
-      {selected ? (
+      {openDashBoard ? (
+        <DashboardPage goBack={openDashBoardClickHandler} />
+      ) : selected ? (
         <InstrumentPage instrument={instrument} deSelect={gobackToHomePage} />
       ) : openLoadedInstrument.status ? (
         <RemoveSamplesFromInstrumentPage

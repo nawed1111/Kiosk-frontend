@@ -1,3 +1,4 @@
+import jwtDecode from "jwt-decode";
 import { useState, useCallback, useEffect } from "react";
 
 let logoutTimer;
@@ -7,16 +8,20 @@ export const useAuth = () => {
   const [user, setUser] = useState(false);
   const [tokenExpirationDate, setTokenExpirationDate] = useState(null);
 
-  const login = useCallback((user, token, expirationDate) => {
+  const login = useCallback((token, expirationDate) => {
     setToken(token);
-    setUser(user);
+
+    // Decoding token to access the payload data and set to user
+    const decodedToken = jwtDecode(token);
+
+    setUser(decodedToken.user);
+
     const tokenExpirationDate =
       expirationDate || new Date(new Date().getTime() + 1000 * 60 * 60); // token expiry is set to 1 hour
     setTokenExpirationDate(tokenExpirationDate);
     localStorage.setItem(
-      "userData",
+      "token",
       JSON.stringify({
-        user: user,
         token: token,
         expiration: tokenExpirationDate.toISOString(),
       })
@@ -27,7 +32,7 @@ export const useAuth = () => {
     setToken(null);
     setUser(null);
     setTokenExpirationDate(null);
-    localStorage.removeItem("userData");
+    localStorage.removeItem("token");
   }, []);
 
   useEffect(() => {
@@ -41,15 +46,15 @@ export const useAuth = () => {
   }, [token, logout, tokenExpirationDate]);
 
   useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem("userData"));
+    const storedData = JSON.parse(localStorage.getItem("token"));
     if (
       storedData &&
       storedData.token &&
       new Date(storedData.expiration) > new Date()
     ) {
-      login(storedData.user, storedData.token, new Date(storedData.expiration));
+      login(storedData.token, new Date(storedData.expiration));
     }
   }, [login]);
 
-  return { token, login, logout, user };
+  return { user, token, login, logout };
 };

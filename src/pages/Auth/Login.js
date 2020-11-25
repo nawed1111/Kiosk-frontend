@@ -30,7 +30,7 @@ function Login(props) {
       props.activeStataus();
     } else {
       if (!auth.isLoggedIn) {
-        auth.login(data.user, data.token);
+        auth.login(data.token);
         setdisplayPin(false);
       }
     }
@@ -55,8 +55,8 @@ function Login(props) {
         alert("Invalid Login");
         throw new Error(responseData.message);
       }
-      // console.log(responseData.user);
-      auth.login(responseData.user, responseData.token);
+
+      auth.login(responseData.token);
 
       if (response.ok) {
         username = "";
@@ -86,7 +86,9 @@ function Login(props) {
         console.log("Application server connected back!");
       });
     });
-  }, [_KIOSK_ID]);
+
+    return () => socket.off("jwttoken");
+  }, []);
 
   // const LoginPage = (
   //   <div>
@@ -119,7 +121,7 @@ function Login(props) {
   return (
     <div>
       {displayPin ? (
-        <EnterPin user={fetchedUser.current} tokenHandler={tokenHandler} />
+        <EnterPin userId={fetchedUser.current} tokenHandler={tokenHandler} />
       ) : auth.isLoggedIn ? (
         <HomePage tokenHandler={tokenHandler} />
       ) : (

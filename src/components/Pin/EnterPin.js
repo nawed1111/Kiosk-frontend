@@ -16,7 +16,7 @@ const EnterPin = (props) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            userId: props.user,
+            userId: props.userId,
             pin: pin,
           }),
         }
@@ -29,7 +29,6 @@ const EnterPin = (props) => {
       }
       props.tokenHandler({
         token: responseData.token,
-        user: responseData.user,
       });
     } catch (err) {
       console.log(err);
