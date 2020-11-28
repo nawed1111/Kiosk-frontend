@@ -6,6 +6,8 @@ import Scan from "../../components/Scan/Scan";
 import Timer from "../../components/Timer/Timer";
 import { AuthContext } from "../../context/auth-context";
 
+const _KIOSK_ID = localStorage.getItem("kioskId");
+
 function Instrument(props) {
   const auth = useContext(AuthContext);
   const _isMounted = useRef(true);
@@ -14,9 +16,6 @@ function Instrument(props) {
   const [time, setTime] = useState();
   const [runTest, setRunTest] = useState(false);
   const [timestamp, setTimestamp] = useState();
-
-  const pathName = window.location.pathname;
-  const kioskId = pathName.split("/")[1];
 
   const doneClickHandler = () => {
     // console.log("samples ", samples);
@@ -36,13 +35,12 @@ function Instrument(props) {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/samples/${kioskId}/${id.value}`
+        `http://localhost:5000/api/samples/${_KIOSK_ID}/${id.value}`
       );
       const responseData = await response.json();
       if (!response.ok) {
         throw new Error(responseData.message);
       }
-      console.log(responseData);
       setSamples(samples.concat({ id: id.value, name: name.value }));
     } catch (error) {
       console.log(error);
@@ -73,7 +71,7 @@ function Instrument(props) {
               samples,
               duration: time,
               timestamp: new Date().getTime(),
-              kioskId,
+              kioskId: _KIOSK_ID,
               user: auth.user,
             }),
           }
@@ -90,7 +88,7 @@ function Instrument(props) {
   };
 
   const goBackToHomePage = () => {
-    props.deSelect(false);
+    props.deSelect();
   };
 
   useEffect(() => {
@@ -103,7 +101,10 @@ function Instrument(props) {
       });
     }
 
-    return () => (_isMounted.current = false);
+    return () => {
+      _isMounted.current = false;
+      socket.off("scannedSample");
+    };
   }, [samples, doneScanning]);
 
   const renderSamples = samples.map((sample, index) => (

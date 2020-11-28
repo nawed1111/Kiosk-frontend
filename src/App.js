@@ -10,14 +10,15 @@ import { useAuth } from "./hooks/auth-hook";
 
 function App() {
   const { token, user, login, logout } = useAuth(); //custom useAuth hook
+
   return (
     <AuthContext.Provider
       value={{
         isLoggedIn: !!token,
-        token: token,
-        user: user,
-        login: login,
-        logout: logout,
+        token,
+        user,
+        login,
+        logout,
       }}
     >
       <BrowserRouter>
