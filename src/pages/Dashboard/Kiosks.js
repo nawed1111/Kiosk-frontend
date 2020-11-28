@@ -2,9 +2,16 @@ import React, { useEffect, useContext, useState } from "react";
 
 import { AuthContext } from "../../context/auth-context";
 
+import NewKioskForm from "../../components/Kiosk/KioskForm";
+
 function Kiosks() {
   const auth = useContext(AuthContext);
   const [kiosks, setKiosks] = useState([]);
+  const [addNewKiosk, setAddNewKiosk] = useState(false);
+
+  const addNewKioskClickHandler = () => {
+    setAddNewKiosk(!addNewKiosk);
+  };
 
   useEffect(() => {
     let page = 1;
@@ -53,6 +60,10 @@ function Kiosks() {
   return (
     <div>
       <h3>Available Kiosks</h3>
+      <button onClick={addNewKioskClickHandler}>
+        {addNewKiosk ? "Minimize" : "Add a kiosk"}
+      </button>
+      {addNewKiosk ? <NewKioskForm /> : undefined}
       {renderKiosks}
     </div>
   );

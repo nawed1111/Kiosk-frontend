@@ -24,9 +24,11 @@ function Start() {
         }
       );
       const responseData = await response.json();
-      if (!responseData.kioskId)
+      /* if (!responseData.kioskId)
         throw new Error("Kiosk not found! or Server not connected!");
-      else setActive(true);
+      else */ setActive(
+        true
+      );
     } catch (err) {
       console.log(err);
     }

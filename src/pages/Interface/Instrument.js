@@ -35,7 +35,7 @@ function Instrument(props) {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/samples/${_KIOSK_ID}/${id.value}`
+        `http://localhost:5000/api/test/${_KIOSK_ID}/${id.value}`
       );
       const responseData = await response.json();
       if (!response.ok) {
@@ -59,7 +59,7 @@ function Instrument(props) {
 
       try {
         const response = await fetch(
-          "http://localhost:5000/api/samples/run-test",
+          "http://localhost:5000/api/test/run-test",
           {
             method: "PUT",
             headers: {

@@ -5,7 +5,6 @@ import { AuthContext } from "../../context/auth-context";
 import InstrumentPage from "./Instrument";
 import RemoveSamplesFromInstrumentPage from "./RemoveSamplesFromInstrument";
 import Timer from "../../components/Timer/Timer";
-import { Link } from "react-router-dom";
 import DashboardPage from "../Dashboard/Dashboard";
 
 const _KIOSK_ID = localStorage.getItem("kioskId");
@@ -145,7 +144,9 @@ function Home(props) {
           Logout
         </a>
         {auth.user.role === "admin" ? (
-          <button onClick={openDashBoardClickHandler}>Dashboard</button>
+          <button onClick={openDashBoardClickHandler}>
+            {openDashBoard ? "Home" : "Dashboard"}
+          </button>
         ) : undefined}
       </nav>
       {openDashBoard ? (
