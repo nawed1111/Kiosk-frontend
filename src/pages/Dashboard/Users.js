@@ -19,9 +19,9 @@ function Users() {
 
         const responseData = await response.json();
         if (!response.ok) {
-          throw new Error("Something went wrong!");
+          throw new Error(responseData.message);
         }
-
+        // console.log(responseData);
         setUsers(responseData.users);
       } catch (error) {
         console.log(error);
@@ -31,9 +31,10 @@ function Users() {
   }, [auth.token]);
 
   const renderUsers = users.map((user, index) => (
-    <div key={`${user.id}${index}`}>
+    <div key={`${user._id}${index}`}>
       <p>
-        <strong>({index + 1})</strong>User ID: {user.id}
+        <strong>({index + 1})</strong>
+        User ID: {user.userId}
       </p>
       <p>Role: {user.role}</p>
     </div>
@@ -41,7 +42,7 @@ function Users() {
 
   return (
     <div>
-      Users
+      <h2>Users:</h2>
       {renderUsers}
     </div>
   );

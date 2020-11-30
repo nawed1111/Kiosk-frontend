@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
 import { Redirect } from "react-router-dom";
 
-import Kiosks from "./Kiosks";
+import Kiosks from "./Kiosks/Kiosks";
 import Users from "./Users";
 
 import { AuthContext } from "../../context/auth-context";
@@ -13,9 +13,9 @@ const DashboardPage = (props) => {
   const auth = useContext(AuthContext);
   const [selectedTab, setSelectedTab] = useState(null);
 
-  const goBackClickHandler = () => {
-    props.goBack();
-  };
+  // const goBackClickHandler = () => {
+  //   props.goBack();
+  // };
 
   return (
     <>
@@ -39,7 +39,7 @@ const DashboardPage = (props) => {
         )}
         no={() => <Redirect to={`/${_KIOSK_ID}`} />}
       />
-      <button onClick={goBackClickHandler}>Go Back</button>
+      {/* <button onClick={goBackClickHandler}>Go Back</button> */}
     </>
   );
 };

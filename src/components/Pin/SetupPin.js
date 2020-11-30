@@ -3,8 +3,8 @@ import { AuthContext } from "../../context/auth-context";
 
 function SetupPin(props) {
   const auth = useContext(AuthContext);
-  const [pin, setPin] = useState(null);
-  const [confirmPin, setConfirmPin] = useState(null);
+  const [pin, setPin] = useState("");
+  const [confirmPin, setConfirmPin] = useState("");
 
   const submitClickHandler = async (event) => {
     event.preventDefault();
@@ -67,7 +67,7 @@ function SetupPin(props) {
             maxLength="4"
             minLength="4"
             size="4"
-            value={pin}
+            value={String(pin)}
             onChange={(event) => pinChangeHandler(event)}
           />
         </label>
@@ -84,7 +84,7 @@ function SetupPin(props) {
             size="4"
             pattern="[0-9]*"
             // inputmode="numeric"
-            value={confirmPin}
+            value={String(confirmPin)}
             onChange={(event) => pinChangeHandler(event)}
           />
         </label>

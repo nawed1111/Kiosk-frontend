@@ -3,8 +3,6 @@ import FilledInstrument from "../../components/Instrument/FilledInstrument";
 
 import { AuthContext } from "../../context/auth-context";
 
-const _KIOSK_ID = localStorage.getItem("kioskId");
-
 function RemoveSamplesFromInstrument(props) {
   const auth = useContext(AuthContext);
 
@@ -21,14 +19,13 @@ function RemoveSamplesFromInstrument(props) {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              kioskId: _KIOSK_ID,
-              instrumentId: props.loadedInstrumentInfo.instrumentId,
+              testId: props.loadedInstrumentInfo.test._id,
             }),
           }
         );
         const responseData = response.json();
         if (!response.ok) {
-          throw new Error(responseData.message);
+          throw new Error("Could not remove" + responseData.message);
         }
         props.updateHomePage(null);
       } catch (error) {
