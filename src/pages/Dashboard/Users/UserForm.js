@@ -9,7 +9,7 @@ function UserForm(props) {
   const fetchUsersInputHandler = async (event) => {
     event.preventDefault();
     try {
-      const response = fetch("http://localhost:5000/api/auth/users", {
+      const response = fetch("/api/auth/users", {
         method: "GET",
         headers: {
           Authorization: "Bearer " + auth.token,
@@ -95,16 +95,9 @@ function UserForm(props) {
         <p />
         <label>
           Role:
-          <select name="role">
-            <option
-              value="standard-user"
-              selected={editUser.role === "standard-user"}
-            >
-              Standard User
-            </option>
-            {/* <option value="admin" selected={editUser.role === "admin"}>
-              Admin
-            </option> */}
+          <select name="role" defaultValue={editUser.role}>
+            <option value="standard-user">Standard User</option>
+            <option value="admin">Admin</option>
           </select>
         </label>
         <p />

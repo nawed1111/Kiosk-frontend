@@ -11,7 +11,7 @@ function RemoveSamplesFromInstrument(props) {
     if (response) {
       try {
         const response = await fetch(
-          "http://localhost:5000/api/test/post-sample-removal",
+          "/api/test/post-sample-removal",
           {
             method: "PATCH",
             headers: {

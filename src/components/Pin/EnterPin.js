@@ -9,7 +9,7 @@ const EnterPin = (props) => {
   const pinSubmitHandler = async () => {
     try {
       const response = await fetch(
-        "http://localhost:5000/api/auth/verify-pin",
+        "/api/auth/verify-pin",
         {
           method: "POST",
           headers: {

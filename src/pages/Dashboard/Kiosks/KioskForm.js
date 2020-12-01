@@ -56,7 +56,7 @@ function KioskForm(props) {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/kiosks/${id}`, {
+      const response = await fetch(`/api/kiosks/${id}`, {
         method: method,
         headers: {
           Authorization: "Bearer " + auth.token,
@@ -81,7 +81,7 @@ function KioskForm(props) {
   const searchInstrumentClickHandler = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/instruments/instrument/${instrumentId}`,
+        `/api/instruments/instrument/${instrumentId}`,
         {
           method: "GET",
           headers: {
