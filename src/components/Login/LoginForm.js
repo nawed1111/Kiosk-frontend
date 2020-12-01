@@ -1,7 +1,4 @@
 import React from "react";
-import Scan from "../Scan/Scan";
-
-const _KIOSK_ID = localStorage.getItem("kioskId");
 
 function LoginForm(props) {
   const loginClickHandler = (event) => {
@@ -13,8 +10,6 @@ function LoginForm(props) {
   };
   return (
     <div>
-      <Scan name="ID Card" hideButton="true" />
-      <p>OR</p>
       <h2>Login with your crdentials</h2>
       <form onSubmit={(event) => loginClickHandler(event)}>
         <label>
@@ -31,8 +26,6 @@ function LoginForm(props) {
         <input type="submit" value="Login" />
       </form>
       <br />
-
-      <a href={`/${_KIOSK_ID}`}>Go Back</a>
     </div>
   );
 }

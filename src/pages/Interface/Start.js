@@ -5,7 +5,7 @@ import { AuthContext } from "../../context/auth-context";
 
 const pathName = window.location.pathname;
 
-if (!localStorage.getItem("kioskId")) {
+if (localStorage.getItem("kioskId") !== pathName.split("/")[1]) {
   localStorage.setItem("kioskId", pathName.split("/")[1]);
 }
 
@@ -24,8 +24,7 @@ function Start() {
         }
       );
       const responseData = await response.json();
-      if (!responseData.kioskId)
-        throw new Error("Kiosk not found! or Server not connected!");
+      if (!response.ok) throw new Error(responseData.message);
       else setActive(true);
     } catch (err) {
       console.log(err);

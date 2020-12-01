@@ -4,9 +4,8 @@ import { AuthContext } from "../../context/auth-context";
 
 import InstrumentPage from "./Instrument";
 import RemoveSamplesFromInstrumentPage from "./RemoveSamplesFromInstrument";
-import Timer from "../../components/Timer/Timer";
-import { Link } from "react-router-dom";
-import DashboardPage from "../Dashboard/Dashboard";
+import InstrumentProperties from "../../components/Instrument/InstrumentProperties";
+import RunningTests from "../../components/Instrument/RunningTests";
 
 const _KIOSK_ID = localStorage.getItem("kioskId");
 
@@ -14,21 +13,16 @@ function Home(props) {
   const auth = useContext(AuthContext);
   const [instrument, setInstrument] = useState(null);
   const [selected, setSelected] = useState(false);
-  const [openDashBoard, setOpenDashBoard] = useState(false);
 
   const [instrumentsofKiosk, setInstrumentsOfKiosk] = useState({
-    emptyInstruments: [],
-    filledInstruments: [],
+    instruments: [],
+    runningTests: [],
   });
 
   const [openLoadedInstrument, setLoadedIntrument] = useState({
     status: false,
     instrumentId: null,
   });
-
-  const openDashBoardClickHandler = () => {
-    setOpenDashBoard(!openDashBoard);
-  };
 
   const instrumentHandler = (data) => {
     setInstrument(data);
@@ -68,72 +62,56 @@ function Home(props) {
             }
           );
           const responseData = await response.json();
-          // console.log(responseData);
+
           if (!response.ok) {
             throw new Error(responseData.message);
           }
           setInstrumentsOfKiosk({
-            emptyInstruments: responseData.instruments,
-            filledInstruments: responseData.testsRunning,
+            instruments: responseData.instruments,
+            runningTests: responseData.testsRunning,
           });
-          // console.log(responseData.testsRunning);
         } catch (err) {
           console.log(err);
         }
       }
       helper();
+      // return () => setInstrumentsOfKiosk({ instruments: [], runningTests: [] });
     }
   }, [auth.token, selected, openLoadedInstrument]);
 
-  const EmptyInstruments = instrumentsofKiosk.emptyInstruments.map(
+  const renderInstruments = instrumentsofKiosk.instruments.map(
     (instrument, index) => (
       <div key={`${instrument.id}${index}`}>
-        <input
-          type="radio"
-          value={instrument.id}
-          id={instrument.id}
-          name="instrument"
-          onClick={instrumentHandler.bind(this, instrument)}
+        <InstrumentProperties
+          instrument={instrument}
+          instrumentHandler={instrumentHandler}
         />
-        <label htmlFor={instrument.id}>{instrument.id}</label>
-        <p>Instrument status: {instrument.filled ? "Filled" : "Empty"}</p>
-        <p>Recommended Temperature: {instrument.recommendedTemperature}C</p>
       </div>
     )
   );
 
-  const FilledInstruments = instrumentsofKiosk.filledInstruments.map(
-    (test, index) => (
-      <div key={`${test.id}${index}`}>
-        <p>Instrument Id: {test.instrumentId}</p>
-        <p>Number of samples: {test.samples.length} </p>
-        <p>Test duration: {test.duration}</p>
-        <p>Test Started: {test.doneOn}</p>
-        <p>Time remaining: </p>
-        <Timer minutes={test.duration} timestamp={test.timestamp} />
-        <p>Test done by: {test.doneBy}</p>
-        <button
-          onClick={openLoadedInstrumentHandler.bind(this, test.instrumentId)}
-        >
-          Remove Now
-        </button>
-      </div>
-    )
-  );
+  const TestsRunning = instrumentsofKiosk.runningTests.map((test, index) => (
+    <div key={`${test._id}${index}`}>
+      <RunningTests
+        test={test}
+        openLoadedInstrumentHandler={openLoadedInstrumentHandler}
+      />
+    </div>
+  ));
 
   const HomePage = (
     <div>
       <h1>Connected Instruments </h1>
-      <h2>Instruments Empty: {instrumentsofKiosk.emptyInstruments.length}</h2>
-      {EmptyInstruments}
+
+      {renderInstruments}
       <p />
       <button disabled={!instrument} onClick={submitHandler}>
         Submit
       </button>
       <h2>
-        Instruments Running Test: {instrumentsofKiosk.filledInstruments.length}
+        Instruments Running Test: {instrumentsofKiosk.runningTests.length}
       </h2>
-      {FilledInstruments}
+      {TestsRunning}
       <p />
     </div>
   );
@@ -144,19 +122,13 @@ function Home(props) {
         <a href={`/${_KIOSK_ID}`} onClick={logoutHandler}>
           Logout
         </a>
-        {auth.user.role === "admin" ? (
-          <button onClick={openDashBoardClickHandler}>Dashboard</button>
-        ) : undefined}
       </nav>
-      {openDashBoard ? (
-        <DashboardPage goBack={openDashBoardClickHandler} />
-      ) : selected ? (
+      {selected ? (
         <InstrumentPage instrument={instrument} deSelect={gobackToHomePage} />
       ) : openLoadedInstrument.status ? (
         <RemoveSamplesFromInstrumentPage
           loadedInstrumentInfo={{
-            instrumentId: openLoadedInstrument.instrumentId,
-            test: instrumentsofKiosk.filledInstruments.find(
+            test: instrumentsofKiosk.runningTests.find(
               (test) => test.instrumentId === openLoadedInstrument.instrumentId
             ),
           }}

@@ -36,13 +36,16 @@ const EnterPin = (props) => {
   };
   return (
     <div>
-      <label htmlFor="pin">Enter Pin </label>
-      <input
-        type="password"
-        id="pin"
-        value={pin}
-        onChange={(event) => pinInputHandler(event)}
-      ></input>
+      <label>
+        Enter Pin
+        <input
+          type="password"
+          id="pin"
+          value={pin}
+          onChange={(event) => pinInputHandler(event)}
+        />
+      </label>
+
       <button onClick={pinSubmitHandler}>Submit</button>
     </div>
   );

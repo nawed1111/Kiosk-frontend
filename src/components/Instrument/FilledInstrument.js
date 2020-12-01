@@ -3,10 +3,10 @@ import Timer from "../Timer/Timer";
 
 function FilledInstrument(props) {
   const loadedInstrumentInfo = props.loadedInstrumentInfo;
-  const { instrumentId, test } = loadedInstrumentInfo;
+  const { test } = loadedInstrumentInfo;
   return (
     <div>
-      <p>Instrument Id: {instrumentId}</p>
+      <p>Instrument Id: {test.instrumentId}</p>
       <p>List of samples: </p>
       {test.samples.map((sample, index) => (
         <div key={`${sample.id}${index}`}>

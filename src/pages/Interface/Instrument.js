@@ -13,7 +13,7 @@ function Instrument(props) {
   const _isMounted = useRef(true);
   const [samples, setSamples] = useState([]);
   const [doneScanning, setDoneScanning] = useState(false);
-  const [time, setTime] = useState();
+  const [time, setTime] = useState("");
   const [runTest, setRunTest] = useState(false);
   const [timestamp, setTimestamp] = useState();
 
@@ -35,7 +35,13 @@ function Instrument(props) {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/samples/${_KIOSK_ID}/${id.value}`
+        `http://localhost:5000/api/test/${_KIOSK_ID}/${id.value}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: "Bearer " + auth.token,
+          },
+        }
       );
       const responseData = await response.json();
       if (!response.ok) {
@@ -59,7 +65,7 @@ function Instrument(props) {
 
       try {
         const response = await fetch(
-          "http://localhost:5000/api/samples/run-test",
+          "http://localhost:5000/api/test/run-test",
           {
             method: "PUT",
             headers: {
@@ -69,7 +75,7 @@ function Instrument(props) {
             body: JSON.stringify({
               instrumentId: props.instrument.id,
               samples,
-              duration: time,
+              duration: +time,
               timestamp: new Date().getTime(),
               kioskId: _KIOSK_ID,
               user: auth.user,
