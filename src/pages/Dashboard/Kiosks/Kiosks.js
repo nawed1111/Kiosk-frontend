@@ -20,7 +20,7 @@ function Kiosks() {
     async function helper() {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/kiosks?page=${page}`,
+          `/api/kiosks?page=${page}`,
           {
             method: "GET",
             headers: {
@@ -61,6 +61,13 @@ function Kiosks() {
     <div>
       <h3>Available Kiosks</h3>
       {renderKiosks}
+      <p />
+      {kioskOperation ? (
+        <KioskForm
+          kiosk={selectedKiosk}
+          goBack={() => setKioskOperation(!kioskOperation)}
+        />
+      ) : undefined}
       <button
         onClick={() => {
           setKioskOperation(!kioskOperation);
@@ -74,12 +81,6 @@ function Kiosks() {
       >
         {kioskOperation ? "Cancel" : "Add a kiosk"}
       </button>
-      {kioskOperation ? (
-        <KioskForm
-          kiosk={selectedKiosk}
-          goBack={() => setKioskOperation(!kioskOperation)}
-        />
-      ) : undefined}
     </div>
   );
 }

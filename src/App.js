@@ -15,9 +15,9 @@ function App() {
   return (
     <AuthContext.Provider
       value={{
-        isLoggedIn: !!token,
         token,
         user,
+        isLoggedIn: !!token,
         login,
         logout,
       }}

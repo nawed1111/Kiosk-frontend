@@ -7,9 +7,8 @@ import RemoveSamplesFromInstrumentPage from "./RemoveSamplesFromInstrument";
 import InstrumentProperties from "../../components/Instrument/InstrumentProperties";
 import RunningTests from "../../components/Instrument/RunningTests";
 
-const _KIOSK_ID = localStorage.getItem("kioskId");
-
 function Home(props) {
+  const _KIOSK_ID = localStorage.getItem("kioskId");
   const auth = useContext(AuthContext);
   const [instrument, setInstrument] = useState(null);
   const [selected, setSelected] = useState(false);
@@ -52,15 +51,12 @@ function Home(props) {
     if (!selected) {
       async function helper() {
         try {
-          const response = await fetch(
-            `http://localhost:5000/api/instruments/${_KIOSK_ID}`,
-            {
-              method: "GET",
-              headers: {
-                Authorization: "Bearer " + auth.token,
-              },
-            }
-          );
+          const response = await fetch(`/api/instruments/${_KIOSK_ID}`, {
+            method: "GET",
+            headers: {
+              Authorization: "Bearer " + auth.token,
+            },
+          });
           const responseData = await response.json();
 
           if (!response.ok) {
@@ -77,7 +73,7 @@ function Home(props) {
       helper();
       // return () => setInstrumentsOfKiosk({ instruments: [], runningTests: [] });
     }
-  }, [auth.token, selected, openLoadedInstrument]);
+  }, [auth.token, _KIOSK_ID, selected, openLoadedInstrument]);
 
   const renderInstruments = instrumentsofKiosk.instruments.map(
     (instrument, index) => (

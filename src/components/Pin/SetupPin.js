@@ -13,7 +13,7 @@ function SetupPin(props) {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/auth/update-user/${userId}`,
+        `/api/auth/update-user/${userId}`,
         {
           method: "PATCH",
           headers: {

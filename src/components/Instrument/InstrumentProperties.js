@@ -13,7 +13,7 @@ function InstrumentProperties(props) {
     async function helper() {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/instruments/instrument/${props.instrument.id}`,
+          `/api/instruments/instrument/${props.instrument.id}`,
           {
             method: "POST",
             headers: {

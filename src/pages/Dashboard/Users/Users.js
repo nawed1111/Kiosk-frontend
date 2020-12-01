@@ -19,7 +19,7 @@ function Users() {
   useEffect(() => {
     async function helper() {
       try {
-        const response = await fetch("http://localhost:5000/api/auth/users", {
+        const response = await fetch("/api/auth/users", {
           method: "GET",
           headers: {
             Authorization: "Bearer " + auth.token,
@@ -43,7 +43,7 @@ function Users() {
     <div key={`${user._id}${index}`}>
       <p>
         <strong>({index + 1})</strong>
-        User ID: {user.userId}
+        {user.username}
       </p>
       <p>Role: {user.role}</p>
       <button
@@ -62,6 +62,12 @@ function Users() {
       <h2>Users:</h2>
       {renderUsers}
       <p />
+      {userOperation ? (
+        <UserForm
+          user={selectedUser}
+          goBack={() => setUserOperation(!userOperation)}
+        />
+      ) : undefined}
       <button
         onClick={() => {
           setUserOperation(!userOperation);
@@ -75,12 +81,6 @@ function Users() {
       >
         {userOperation ? "Cancel" : "Create a User"}
       </button>
-      {userOperation ? (
-        <UserForm
-          user={selectedUser}
-          goBack={() => setUserOperation(!userOperation)}
-        />
-      ) : undefined}
     </div>
   );
 }
