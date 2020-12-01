@@ -4,7 +4,6 @@ import { AuthContext } from "../../context/auth-context";
 
 import InstrumentPage from "./Instrument";
 import RemoveSamplesFromInstrumentPage from "./RemoveSamplesFromInstrument";
-import DashboardPage from "../Dashboard/Dashboard";
 import InstrumentProperties from "../../components/Instrument/InstrumentProperties";
 import RunningTests from "../../components/Instrument/RunningTests";
 
@@ -14,7 +13,6 @@ function Home(props) {
   const auth = useContext(AuthContext);
   const [instrument, setInstrument] = useState(null);
   const [selected, setSelected] = useState(false);
-  const [openDashBoard, setOpenDashBoard] = useState(false);
 
   const [instrumentsofKiosk, setInstrumentsOfKiosk] = useState({
     instruments: [],
@@ -25,10 +23,6 @@ function Home(props) {
     status: false,
     instrumentId: null,
   });
-
-  const openDashBoardClickHandler = () => {
-    setOpenDashBoard(!openDashBoard);
-  };
 
   const instrumentHandler = (data) => {
     setInstrument(data);
@@ -128,16 +122,8 @@ function Home(props) {
         <a href={`/${_KIOSK_ID}`} onClick={logoutHandler}>
           Logout
         </a>
-        {console.log(auth)}
-        {auth.isLoggedIn && auth.user.role === "admin" ? ( //bug in this line
-          <button onClick={openDashBoardClickHandler}>
-            {openDashBoard ? "Home" : "Dashboard"}
-          </button>
-        ) : undefined}
       </nav>
-      {openDashBoard ? (
-        <DashboardPage />
-      ) : selected ? (
+      {selected ? (
         <InstrumentPage instrument={instrument} deSelect={gobackToHomePage} />
       ) : openLoadedInstrument.status ? (
         <RemoveSamplesFromInstrumentPage

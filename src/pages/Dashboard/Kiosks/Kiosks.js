@@ -53,7 +53,6 @@ function Kiosks() {
         >
           Edit
         </button>
-        <button>X</button>
       </p>
     </div>
   ));

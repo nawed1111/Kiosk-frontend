@@ -10,23 +10,12 @@ import SetupPin from "../../components/Pin/SetupPin";
 import LoginForm from "../../components/Login/LoginForm";
 import Scan from "../../components/Scan/Scan";
 
-const _KIOSK_ID = localStorage.getItem("kioskId");
-
 function Login(props) {
+  const _KIOSK_ID = localStorage.getItem("kioskId");
   const auth = useContext(AuthContext);
   const [setupPin, setSetupPin] = useState(false);
   const [displayPin, setdisplayPin] = useState(false);
-  /*
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
 
-  const usenameChangeHandler = (event) => {
-    setUsername(event.target.value);
-  };
-  const passwordChangeHandler = (event) => {
-    setPassword(event.target.value);
-  };
-  */
   const tokenHandler = (data) => {
     // console.log(data);
     if (Object.keys(data).length === 0) {
@@ -99,15 +88,18 @@ function Login(props) {
       });
     });
 
-    return () => socket.off("jwttoken");
-  }, []);
+    // return () => socket.off("jwttoken");
+  }, [_KIOSK_ID]);
 
   return (
     <div>
-      {!auth.isLoggedIn && setupPin ? (
-        <LoginForm handleLogin={submitClickHandler} />
-      ) : setupPin ? (
+      {auth.isLoggedIn && setupPin ? (
         <SetupPin handleSubmit={setSetupPin} />
+      ) : setupPin ? (
+        <div>
+          <LoginForm handleLogin={submitClickHandler} />
+          <a href={`/${_KIOSK_ID}`}>Go Back</a>
+        </div>
       ) : displayPin ? (
         <EnterPin userId={fetchedUser.current} tokenHandler={tokenHandler} />
       ) : auth.isLoggedIn && !setupPin ? (
@@ -116,7 +108,10 @@ function Login(props) {
         <div>
           <Scan name="ID Card" hideButton="true" />
           <p>OR</p>
-          <LoginForm handleLogin={submitClickHandler} />
+          <div>
+            <LoginForm handleLogin={submitClickHandler} />
+            <a href={`/${_KIOSK_ID}`}>Go Back</a>
+          </div>
         </div>
       )}
     </div>

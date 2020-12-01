@@ -8,14 +8,14 @@ function SetupPin(props) {
 
   const submitClickHandler = async (event) => {
     event.preventDefault();
-
+    const userId = auth.user.userId;
     if (pin !== confirmPin) return;
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/auth/create-user",
+        `http://localhost:5000/api/auth/update-user/${userId}`,
         {
-          method: "PUT",
+          method: "PATCH",
           headers: {
             Authorization: "Bearer " + auth.token,
             "Content-Type": "application/json",

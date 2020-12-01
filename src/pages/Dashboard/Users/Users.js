@@ -1,11 +1,20 @@
 import React, { useState, useContext, useEffect } from "react";
 
-import { AuthContext } from "../../context/auth-context";
+import { AuthContext } from "../../../context/auth-context";
+import UserForm from "./UserForm";
 
 function Users() {
   const auth = useContext(AuthContext);
 
   const [users, setUsers] = useState([]);
+
+  const [selectedUser, setSelectedUser] = useState({
+    userId: "",
+    role: "",
+    firstTimeLogin: true,
+    locked: false,
+  });
+  const [userOperation, setUserOperation] = useState(false);
 
   useEffect(() => {
     async function helper() {
@@ -37,6 +46,14 @@ function Users() {
         User ID: {user.userId}
       </p>
       <p>Role: {user.role}</p>
+      <button
+        onClick={() => {
+          setUserOperation(true);
+          setSelectedUser(user);
+        }}
+      >
+        Edit
+      </button>
     </div>
   ));
 
@@ -44,6 +61,26 @@ function Users() {
     <div>
       <h2>Users:</h2>
       {renderUsers}
+      <p />
+      <button
+        onClick={() => {
+          setUserOperation(!userOperation);
+          setSelectedUser({
+            id: "",
+            role: "",
+            firstTimeLogin: true,
+            locked: false,
+          });
+        }}
+      >
+        {userOperation ? "Cancel" : "Create a User"}
+      </button>
+      {userOperation ? (
+        <UserForm
+          user={selectedUser}
+          goBack={() => setUserOperation(!userOperation)}
+        />
+      ) : undefined}
     </div>
   );
 }

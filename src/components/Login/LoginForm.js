@@ -1,7 +1,5 @@
 import React from "react";
 
-const _KIOSK_ID = localStorage.getItem("kioskId");
-
 function LoginForm(props) {
   const loginClickHandler = (event) => {
     event.preventDefault();
@@ -28,8 +26,6 @@ function LoginForm(props) {
         <input type="submit" value="Login" />
       </form>
       <br />
-
-      <a href={`/${_KIOSK_ID}`}>Go Back</a>
     </div>
   );
 }

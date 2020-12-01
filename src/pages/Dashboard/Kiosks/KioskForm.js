@@ -21,6 +21,10 @@ function KioskForm(props) {
 
   const addNewInstrumentClickHandler = (data) => {
     // console.log(data);
+    console.log(newKiosk.instruments);
+    if (newKiosk.instruments.includes(data)) {
+      console.log(newKiosk.instruments);
+    }
     setNewKiosk({
       ...newKiosk,
       instruments: newKiosk.instruments.concat(data),
@@ -126,10 +130,9 @@ function KioskForm(props) {
       <p>
         ({index + 1}) Instrument ID: {test.instrumentId}
       </p>
-      <p>Duration: {test.duration}</p>
+      <p>Duration: {test.duration} mins</p>
       <p>Done on: {test.doneOn}</p>
       <p>Done By: {test.doneBy}</p>
-      {console.log("Tests: ", test)}
     </div>
   ));
 
