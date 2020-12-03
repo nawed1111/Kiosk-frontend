@@ -51,17 +51,21 @@ function Home(props) {
     if (!selected) {
       async function helper() {
         try {
-          const response = await fetch(`/api/instruments/${_KIOSK_ID}`, {
-            method: "GET",
-            headers: {
-              Authorization: "Bearer " + auth.token,
-            },
-          });
+          const response = await fetch(
+            `http://localhost:5000/api/instruments/${_KIOSK_ID}`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: "Bearer " + auth.accessToken,
+              },
+            }
+          );
           const responseData = await response.json();
 
           if (!response.ok) {
             throw new Error(responseData.message);
           }
+          // console.log(responseData);
           setInstrumentsOfKiosk({
             instruments: responseData.instruments,
             runningTests: responseData.testsRunning,
@@ -71,9 +75,8 @@ function Home(props) {
         }
       }
       helper();
-      // return () => setInstrumentsOfKiosk({ instruments: [], runningTests: [] });
     }
-  }, [auth.token, _KIOSK_ID, selected, openLoadedInstrument]);
+  }, [auth.accessToken, _KIOSK_ID, selected, openLoadedInstrument]);
 
   const renderInstruments = instrumentsofKiosk.instruments.map(
     (instrument, index) => (

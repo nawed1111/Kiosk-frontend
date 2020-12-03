@@ -7,7 +7,7 @@ import HomePage from "../Interface/Home";
 // import Scan from "../../components/Scan/Scan";
 import EnterPin from "../../components/Pin/EnterPin";
 import SetupPin from "../../components/Pin/SetupPin";
-import LoginForm from "../../components/Login/LoginForm";
+// import LoginForm from "../../components/Login/LoginForm";
 import Scan from "../../components/Scan/Scan";
 
 function Login(props) {
@@ -23,12 +23,12 @@ function Login(props) {
       props.activeStataus();
     } else {
       if (!auth.isLoggedIn) {
-        auth.login(data.token);
+        auth.login(data.accessToken, data.refreshToken);
         setdisplayPin(false);
       }
     }
   };
-
+  /*
   const submitClickHandler = async (username, password) => {
     try {
       const response = await fetch("/api/auth/login", {
@@ -51,18 +51,19 @@ function Login(props) {
       // console.log(responseData);
 
       if (responseData.setupPin) {
-        auth.login(responseData.token);
+        auth.login(responseData.accessToken, responseData.refreshToken);
         setSetupPin(true);
       } else {
-        auth.login(responseData.token);
+        auth.login(responseData.accessToken, responseData.refreshToken);
       }
+
       username = "";
       password = "";
     } catch (err) {
       console.log(err);
     }
   };
-
+*/
   const fetchedUser = useRef();
 
   useEffect(() => {
@@ -72,7 +73,7 @@ function Login(props) {
 
     socket.on("jwttoken", (data) => {
       fetchedUser.current = data.userId;
-      console.log(data);
+
       if (data.displayPin) setdisplayPin(true);
       else if (data.setupPin) {
         window.alert("Please login to set up your pin");
@@ -93,25 +94,23 @@ function Login(props) {
 
   return (
     <div>
-      {auth.isLoggedIn && setupPin ? (
-        <SetupPin handleSubmit={setSetupPin} />
+      {auth.isLoggedIn ? (
+        <HomePage tokenHandler={tokenHandler} />
       ) : setupPin ? (
-        <div>
-          <LoginForm handleLogin={submitClickHandler} />
-          <a href={`/${_KIOSK_ID}`}>Go Back</a>
-        </div>
+        <SetupPin handleSubmit={setSetupPin} />
       ) : displayPin ? (
         <EnterPin userId={fetchedUser.current} tokenHandler={tokenHandler} />
-      ) : auth.isLoggedIn && !setupPin ? (
-        <HomePage tokenHandler={tokenHandler} />
       ) : (
         <div>
           <Scan name="ID Card" hideButton="true" />
-          <p>OR</p>
+          <p />
+          <p />
+          <a href={`/${_KIOSK_ID}`}>Go Back</a>
+          {/* <p>OR</p>
           <div>
             <LoginForm handleLogin={submitClickHandler} />
             <a href={`/${_KIOSK_ID}`}>Go Back</a>
-          </div>
+          </div> */}
         </div>
       )}
     </div>

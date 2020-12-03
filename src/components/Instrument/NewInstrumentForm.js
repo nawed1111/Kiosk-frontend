@@ -1,7 +1,7 @@
 import React from "react";
 
 function NewInstrumentForm(props) {
-  const { id, name, properties } = props.instrument;
+  const { instrumentid, name, properties } = props.instrument;
   const onAddClickHandler = (event) => {
     event.preventDefault();
     const {
@@ -16,19 +16,23 @@ function NewInstrumentForm(props) {
         };
       });
     // console.log(propertiesChecked);
-    props.add({ id, name, properties: propertiesChecked });
+    props.add({ instrumentid, name, properties: propertiesChecked });
   };
   return (
     <div>
       <h3> Instrument Information </h3>
-      <p>Instrument ID: {id}</p>
+      <p>Instrument ID: {instrumentid}</p>
       <p>Instrument Name: {name} </p>
       <p> Properties: </p>
       <form onSubmit={(event) => onAddClickHandler(event)}>
-        {Object.keys(properties).map((key, index) => (
-          <label key={`${key}${index}`}>
-            <input type="checkbox" name="SelectedProperties" value={key} />
-            {key}
+        {properties.map((el, index) => (
+          <label key={`${el._id}${index}`}>
+            <input
+              type="checkbox"
+              name="SelectedProperties"
+              value={el.property}
+            />
+            {el.property}
           </label>
         ))}
         <p />

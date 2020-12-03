@@ -9,11 +9,11 @@ function FilledInstrument(props) {
       <p>Instrument Id: {test.instrumentId}</p>
       <p>List of samples: </p>
       {test.samples.map((sample, index) => (
-        <div key={`${sample.id}${index}`}>
+        <div key={`${sample.sampleid}${index}`}>
           <p>
-            {`(${index + 1})`}Sample Name: {sample.name}
+            {`(${index + 1}) `}
+            {sample.sampleid}
           </p>
-          <p>Sample ID: {sample.id}</p>
         </div>
       ))}
       <p>Test duration: {test.duration}</p>

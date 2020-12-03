@@ -10,14 +10,15 @@ import { useAuth } from "./hooks/auth-hook";
 import DashboardPage from "./pages/Dashboard/Dashboard";
 
 function App() {
-  const { token, user, login, logout } = useAuth(); //custom useAuth hook
+  const { accessToken, refreshToken, user, login, logout } = useAuth(); //custom useAuth hook
 
   return (
     <AuthContext.Provider
       value={{
-        token,
+        accessToken,
+        refreshToken,
         user,
-        isLoggedIn: !!token,
+        isLoggedIn: !!accessToken,
         login,
         logout,
       }}

@@ -9,10 +9,10 @@ function UserForm(props) {
   const fetchUsersInputHandler = async (event) => {
     event.preventDefault();
     try {
-      const response = fetch("/api/auth/users", {
+      const response = fetch("http://localhost:5000/api/auth/users", {
         method: "GET",
         headers: {
-          Authorization: "Bearer " + auth.token,
+          Authorization: "Bearer " + auth.accessToken,
         },
       });
 
@@ -32,10 +32,10 @@ function UserForm(props) {
 
     const { userId, role, firstTimeLogin, locked } = event.target;
 
-    let method;
+    // let method;
 
-    if (editUser.userId) method = "PATCH";
-    else method = "PUT";
+    // if (editUser.userId) method = "PATCH";
+    // else method = "PUT";
 
     console.log(
       userId.value,

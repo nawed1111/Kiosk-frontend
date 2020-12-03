@@ -20,11 +20,11 @@ function Kiosks() {
     async function helper() {
       try {
         const response = await fetch(
-          `/api/kiosks?page=${page}`,
+          `http://localhost:5000/api/kiosks?page=${page}`,
           {
             method: "GET",
             headers: {
-              Authorization: "Bearer " + auth.token,
+              Authorization: "Bearer " + auth.accessToken,
             },
           }
         );

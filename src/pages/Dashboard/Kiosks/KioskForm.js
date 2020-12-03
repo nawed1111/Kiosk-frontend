@@ -21,10 +21,10 @@ function KioskForm(props) {
 
   const addNewInstrumentClickHandler = (data) => {
     // console.log(data);
-    console.log(newKiosk.instruments);
-    if (newKiosk.instruments.includes(data)) {
-      console.log(newKiosk.instruments);
-    }
+    // console.log(newKiosk.instruments);
+    // if (newKiosk.instruments.includes(data)) {
+    //   console.log(newKiosk.instruments);
+    // }
     setNewKiosk({
       ...newKiosk,
       instruments: newKiosk.instruments.concat(data),
@@ -36,7 +36,6 @@ function KioskForm(props) {
 
   const instrumentIdInputOnChangeHandler = (event) => {
     event.preventDefault();
-
     setInstrumentId(event.target.value);
   };
 
@@ -56,10 +55,10 @@ function KioskForm(props) {
     }
 
     try {
-      const response = await fetch(`/api/kiosks/${id}`, {
+      const response = await fetch(`http://localhost:5000/api/kiosks/${id}`, {
         method: method,
         headers: {
-          Authorization: "Bearer " + auth.token,
+          Authorization: "Bearer " + auth.accessToken,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -81,11 +80,11 @@ function KioskForm(props) {
   const searchInstrumentClickHandler = async () => {
     try {
       const response = await fetch(
-        `/api/instruments/instrument/${instrumentId}`,
+        `http://localhost:5000/api/instruments/instrument/${instrumentId}`,
         {
           method: "GET",
           headers: {
-            Authorization: "Bearer " + auth.token,
+            Authorization: "Bearer " + auth.accessToken,
           },
         }
       );
@@ -94,7 +93,7 @@ function KioskForm(props) {
       if (!response.ok) {
         throw new Error(responseData.message);
       }
-
+      // console.log(responseData);
       //   InstrumentId.value="";
 
       setNewInstrument({ open: true, instrument: responseData.instrument });

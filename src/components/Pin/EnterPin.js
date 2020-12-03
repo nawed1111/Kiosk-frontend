@@ -8,27 +8,25 @@ const EnterPin = (props) => {
   };
   const pinSubmitHandler = async () => {
     try {
-      const response = await fetch(
-        "/api/auth/verify-pin",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userId: props.userId,
-            pin: pin,
-          }),
-        }
-      );
+      const response = await fetch("http://localhost:5000/api/auth/verify-pin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: props.userId,
+          pin: pin,
+        }),
+      });
       const responseData = await response.json();
 
       if (!response.ok) {
-        alert("Invalid Login");
+        alert(responseData.message);
         throw new Error(responseData.message);
       }
       props.tokenHandler({
-        token: responseData.token,
+        accessToken: responseData.accessToken,
+        refreshToken: responseData.refreshToken,
       });
     } catch (err) {
       console.log(err);

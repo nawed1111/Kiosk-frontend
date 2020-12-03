@@ -17,7 +17,7 @@ function Start() {
 
   const clickHandler = async () => {
     try {
-      const response = await fetch(`/api/kiosks/${_KIOSK_ID}`, {
+      const response = await fetch(`http://localhost:5000/api/kiosks/${_KIOSK_ID}`, {
         method: "GET",
       });
       const responseData = await response.json();

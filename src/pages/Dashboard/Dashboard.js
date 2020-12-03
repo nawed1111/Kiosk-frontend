@@ -16,25 +16,27 @@ const DashboardPage = () => {
 
   const submitClickHandler = async (username, password) => {
     try {
-      const response = await fetch("/api/auth/admin/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: username,
-          password: password,
-        }),
-      });
+      const response = await fetch(
+        "http://localhost:5000/api/auth/admin/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: username,
+            password: password,
+          }),
+        }
+      );
 
       const responseData = await response.json();
-
       if (!response.ok) {
         alert("For admin only");
         throw new Error(responseData.message);
       }
       // console.log(responseData);
-      auth.login(responseData.token);
+      auth.login(responseData.accessToken, responseData.refreshToken);
 
       username = "";
       password = "";

@@ -19,10 +19,10 @@ function Users() {
   useEffect(() => {
     async function helper() {
       try {
-        const response = await fetch("/api/auth/users", {
+        const response = await fetch("http://localhost:5000/api/auth/users", {
           method: "GET",
           headers: {
-            Authorization: "Bearer " + auth.token,
+            Authorization: "Bearer " + auth.accessToken,
           },
         });
 
@@ -37,7 +37,7 @@ function Users() {
       }
     }
     helper();
-  }, [auth.token]);
+  }, [auth.accessToken]);
 
   const renderUsers = users.map((user, index) => (
     <div key={`${user._id}${index}`}>

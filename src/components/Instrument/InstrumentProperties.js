@@ -13,16 +13,12 @@ function InstrumentProperties(props) {
     async function helper() {
       try {
         const response = await fetch(
-          `/api/instruments/instrument/${props.instrument.id}`,
+          `http://localhost:5000/api/instruments/instrument/${props.instrument.instrumentid}`,
           {
-            method: "POST",
+            method: "GET",
             headers: {
-              Authorization: "Bearer " + auth.token,
-              "Content-Type": "application/json",
+              Authorization: "Bearer " + auth.accessToken,
             },
-            body: JSON.stringify({
-              properties: props.instrument.properties,
-            }),
           }
         );
         const responseData = await response.json();
@@ -33,24 +29,25 @@ function InstrumentProperties(props) {
       } catch (error) {}
     }
     helper();
-  }, [auth.token, props.instrument]);
+  }, [auth.accessToken, props.instrument]);
 
   return (
     <div>
       <input
         type="radio"
-        value={instrument.id}
-        id={instrument.id}
+        value={props.instrument.instrumentid}
         name="instrument"
         onClick={props.instrumentHandler.bind(this, instrument)}
-        hidden={instrument.properties.isFilled}
+        hidden={instrument.status === "inuse"}
       />
-      <label htmlFor={instrument.id}>{instrument.name}</label>
-      {Object.keys(instrument.properties).map((key, index) => (
+      <p>{props.instrument.instrumentid}</p>
+      <p>{props.instrument.name}</p>
+      <p>{instrument.status}</p>
+      {/* {Object.keys(instrument.properties).map((key, index) => (
         <p key={`${key}${index}`}>
           {key}: {instrument.properties[key].toString()}
         </p>
-      ))}
+      ))} */}
     </div>
   );
 }

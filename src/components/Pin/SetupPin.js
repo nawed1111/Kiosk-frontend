@@ -12,20 +12,17 @@ function SetupPin(props) {
     if (pin !== confirmPin) return;
 
     try {
-      const response = await fetch(
-        `/api/auth/update-user/${userId}`,
-        {
-          method: "PATCH",
-          headers: {
-            Authorization: "Bearer " + auth.token,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            pin,
-            confirmPin,
-          }),
-        }
-      );
+      const response = await fetch(`http://localhost:5000/api/auth/update-user/${userId}`, {
+        method: "PATCH",
+        headers: {
+          Authorization: "Bearer " + auth.accessToken,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          pin,
+          confirmPin,
+        }),
+      });
       const responseData = await response.json();
       if (!response.ok) {
         throw new Error(responseData.message);

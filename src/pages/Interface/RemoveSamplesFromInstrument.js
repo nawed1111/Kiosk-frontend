@@ -11,11 +11,11 @@ function RemoveSamplesFromInstrument(props) {
     if (response) {
       try {
         const response = await fetch(
-          "/api/test/post-sample-removal",
+          "http://localhost:5000/api/test/post-sample-removal",
           {
             method: "PATCH",
             headers: {
-              Authorization: "Bearer " + auth.token,
+              Authorization: "Bearer " + auth.accessToken,
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
@@ -24,8 +24,9 @@ function RemoveSamplesFromInstrument(props) {
           }
         );
         const responseData = response.json();
-        if (!response.ok) {
-          throw new Error("Could not remove" + responseData.message);
+        console.log(responseData);
+        if (response.status === 403) {
+          window.alert("Test still running");
         }
         props.updateHomePage(null);
       } catch (error) {
