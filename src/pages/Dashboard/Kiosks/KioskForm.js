@@ -1,10 +1,11 @@
 import React, { useContext, useState } from "react";
 
 import { AuthContext } from "../../../context/auth-context";
-import NewInstrumentForm from "../../../components/Instrument/NewInstrumentForm";
+import NewInstrumentForm from "../../Interface/Instrument/NewInstrumentForm";
 
 function KioskForm(props) {
   const auth = useContext(AuthContext);
+  const axios = auth.getAxiosInstance;
   const editkiosk = props.kiosk;
   // console.log("Kiosk: ", editkiosk);
   const [newKiosk, setNewKiosk] = useState({
@@ -21,10 +22,10 @@ function KioskForm(props) {
 
   const addNewInstrumentClickHandler = (data) => {
     // console.log(data);
-    console.log(newKiosk.instruments);
-    if (newKiosk.instruments.includes(data)) {
-      console.log(newKiosk.instruments);
-    }
+    // console.log(newKiosk.instruments);
+    // if (newKiosk.instruments.includes(data)) {
+    //   console.log(newKiosk.instruments);
+    // }
     setNewKiosk({
       ...newKiosk,
       instruments: newKiosk.instruments.concat(data),
@@ -36,7 +37,6 @@ function KioskForm(props) {
 
   const instrumentIdInputOnChangeHandler = (event) => {
     event.preventDefault();
-
     setInstrumentId(event.target.value);
   };
 
@@ -56,52 +56,39 @@ function KioskForm(props) {
     }
 
     try {
-      const response = await fetch(`/api/kiosks/${id}`, {
-        method: method,
-        headers: {
-          Authorization: "Bearer " + auth.token,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          kioskId: id,
-          instruments,
-          rfreader,
-        }),
-      });
-
-      const responseData = await response.json();
-      if (!response.ok) {
-        throw new Error(responseData.message);
-      }
-      window.alert(responseData.message);
+      const response = await axios(
+        `/api/kiosks/${id}`,
+        { kioskId: id, instruments, rfreader },
+        {
+          method: method,
+          headers: {
+            Authorization: "Bearer " + auth.accessToken,
+            "Content-Type": "application/json",
+          },
+        }
+      );
       props.goBack();
-    } catch (error) {}
+    } catch (error) {
+      console.log(error.response.data.message);
+    }
   };
 
   const searchInstrumentClickHandler = async () => {
     try {
-      const response = await fetch(
+      const response = await axios.get(
         `/api/instruments/instrument/${instrumentId}`,
         {
-          method: "GET",
           headers: {
-            Authorization: "Bearer " + auth.token,
+            Authorization: "Bearer " + auth.accessToken,
           },
         }
       );
-      const responseData = await response.json();
 
-      if (!response.ok) {
-        throw new Error(responseData.message);
-      }
-
-      //   InstrumentId.value="";
-
-      setNewInstrument({ open: true, instrument: responseData.instrument });
+      setNewInstrument({ open: true, instrument: response.data.instrument });
 
       // console.log(responseData.instrument);
     } catch (error) {
-      console.log(error);
+      console.log(error.response.data.message);
     }
   };
 

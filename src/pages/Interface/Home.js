@@ -2,14 +2,15 @@ import React, { useState, useEffect, useContext } from "react";
 
 import { AuthContext } from "../../context/auth-context";
 
-import InstrumentPage from "./Instrument";
-import RemoveSamplesFromInstrumentPage from "./RemoveSamplesFromInstrument";
-import InstrumentProperties from "../../components/Instrument/InstrumentProperties";
-import RunningTests from "../../components/Instrument/RunningTests";
+import InstrumentPage from "./Instrument/Instrument";
+import RemoveSamplesFromInstrumentPage from "./Instrument/RemoveSamplesFromInstrument";
+// import InstrumentProperties from "../../components/Instrument/InstrumentProperties";
+import RunningTests from "./Instrument/RunningTests";
 
 function Home(props) {
   const _KIOSK_ID = localStorage.getItem("kioskId");
   const auth = useContext(AuthContext);
+  auth.setInterceptors();
   const [instrument, setInstrument] = useState(null);
   const [selected, setSelected] = useState(false);
 
@@ -38,8 +39,24 @@ function Home(props) {
     }
   };
 
-  const logoutHandler = () => {
-    props.tokenHandler({});
+  const logoutHandler = async () => {
+    try {
+      await auth.getAxiosInstance.delete(
+        `/api/auth/logout`,
+        {
+          data: { refreshToken: auth.refreshToken },
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      auth.logout();
+      window.location.reload();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const gobackToHomePage = () => {
@@ -51,37 +68,39 @@ function Home(props) {
     if (!selected) {
       async function helper() {
         try {
-          const response = await fetch(`/api/instruments/${_KIOSK_ID}`, {
-            method: "GET",
-            headers: {
-              Authorization: "Bearer " + auth.token,
-            },
-          });
-          const responseData = await response.json();
-
-          if (!response.ok) {
-            throw new Error(responseData.message);
-          }
+          const response = await auth.getAxiosInstance.get(
+            `/api/instruments/${_KIOSK_ID}`,
+            {
+              headers: {
+                Authorization: "Bearer " + auth.accessToken,
+              },
+            }
+          );
           setInstrumentsOfKiosk({
-            instruments: responseData.instruments,
-            runningTests: responseData.testsRunning,
+            instruments: response.data.instruments,
+            runningTests: response.data.testsRunning,
           });
         } catch (err) {
-          console.log(err);
+          console.log(err.response.data.message);
         }
       }
       helper();
-      // return () => setInstrumentsOfKiosk({ instruments: [], runningTests: [] });
     }
-  }, [auth.token, _KIOSK_ID, selected, openLoadedInstrument]);
+  }, [auth, _KIOSK_ID, selected, openLoadedInstrument]);
 
   const renderInstruments = instrumentsofKiosk.instruments.map(
     (instrument, index) => (
-      <div key={`${instrument.id}${index}`}>
-        <InstrumentProperties
-          instrument={instrument}
-          instrumentHandler={instrumentHandler}
+      <div key={`${instrument.instrumentid}${index}`}>
+        <input
+          type="radio"
+          value={instrument.instrumentid}
+          name="instrument"
+          onClick={instrumentHandler.bind(this, instrument)}
+          hidden={instrument.status === "inuse"}
         />
+        <p>{instrument.instrumentid}</p>
+        <p>{instrument.name}</p>
+        <p>{instrument.status}</p>
       </div>
     )
   );
@@ -115,9 +134,10 @@ function Home(props) {
   return (
     <>
       <nav>
-        <a href={`/${_KIOSK_ID}`} onClick={logoutHandler}>
+        {/* <a href={`/${_KIOSK_ID}`} onClick={logoutHandler}>
           Logout
-        </a>
+        </a> */}
+        <button onClick={logoutHandler}>Logout</button>
       </nav>
       {selected ? (
         <InstrumentPage instrument={instrument} deSelect={gobackToHomePage} />

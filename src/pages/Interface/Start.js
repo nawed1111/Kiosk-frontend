@@ -13,36 +13,23 @@ function Start() {
   const _KIOSK_ID = localStorage.getItem("kioskId");
 
   const auth = useContext(AuthContext);
+  const axios = auth.getAxiosInstance;
+
   const [active, setActive] = useState(false);
 
   const clickHandler = async () => {
     try {
-      const response = await fetch(`/api/kiosks/${_KIOSK_ID}`, {
-        method: "GET",
-      });
-      const responseData = await response.json();
-      if (!response.ok) throw new Error(responseData.message);
-      else setActive(true);
-    } catch (err) {
-      console.log(err);
-    }
-  };
+      await axios.get(`/api/kiosks/${_KIOSK_ID}`);
 
-  const toggleActive = () => {
-    setActive(!active);
+      setActive(true);
+    } catch (err) {
+      window.alert(err.response.data.error.message);
+    }
   };
 
   const StartPage = <button onClick={clickHandler}>Click to start</button>;
 
-  return (
-    <>
-      {active || auth.isLoggedIn ? (
-        <LoginPage activeStataus={toggleActive} />
-      ) : (
-        StartPage
-      )}
-    </>
-  );
+  return <>{active || auth.isLoggedIn ? <LoginPage /> : StartPage}</>;
 }
 
 export default Start;

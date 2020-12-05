@@ -3,38 +3,35 @@ import { AuthContext } from "../../context/auth-context";
 
 function SetupPin(props) {
   const auth = useContext(AuthContext);
+  const axios = auth.getAxiosInstance;
   const [pin, setPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
 
   const submitClickHandler = async (event) => {
     event.preventDefault();
-    const userId = auth.user.userId;
     if (pin !== confirmPin) return;
 
     try {
-      const response = await fetch(
-        `/api/auth/update-user/${userId}`,
+      const response = await axios.patch(
+        `/api/auth/update-user/${props.userid}`,
         {
-          method: "PATCH",
+          pin,
+          confirmPin,
+        },
+        {
           headers: {
-            Authorization: "Bearer " + auth.token,
+            Authorization: "Bearer " + auth.accessToken,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            pin,
-            confirmPin,
-          }),
         }
       );
-      const responseData = await response.json();
-      if (!response.ok) {
-        throw new Error(responseData.message);
+      if (response.status !== 200) {
+        throw new Error(response.message);
       }
-      console.log(responseData);
 
       setPin(null);
       setConfirmPin(null);
-      props.handleSubmit(false);
+      props.handleSubmit();
     } catch (error) {
       console.log(error);
     }

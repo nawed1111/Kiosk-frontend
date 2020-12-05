@@ -1,5 +1,5 @@
 import React from "react";
-import Timer from "../Timer/Timer";
+import Timer from "../../../components/Timer/Timer";
 
 function FilledInstrument(props) {
   const loadedInstrumentInfo = props.loadedInstrumentInfo;
@@ -9,15 +9,15 @@ function FilledInstrument(props) {
       <p>Instrument Id: {test.instrumentId}</p>
       <p>List of samples: </p>
       {test.samples.map((sample, index) => (
-        <div key={`${sample.id}${index}`}>
+        <div key={`${sample.sampleid}${index}`}>
           <p>
-            {`(${index + 1})`}Sample Name: {sample.name}
+            {`(${index + 1}) `}
+            {sample.sampleid}
           </p>
-          <p>Sample ID: {sample.id}</p>
         </div>
       ))}
       <p>Test duration: {test.duration}</p>
-      <p>Test Started: {test.doneOn}</p>
+      <p>Test Started: {test.doneOn.split("GMT")[0]}</p>
       <p>Time remaining: </p>
       <Timer minutes={test.duration} timestamp={test.timestamp} />
       <p>Test done by: {test.doneBy}</p>

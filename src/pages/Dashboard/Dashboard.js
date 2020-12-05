@@ -2,44 +2,56 @@ import React, { useContext, useState } from "react";
 import { Redirect } from "react-router-dom";
 
 import Kiosks from "./Kiosks/Kiosks";
-import Users from "./Users/Users";
+import Admin from "./Admins/Admin";
 
 import { AuthContext } from "../../context/auth-context";
 import Can from "../../components/Can/Can";
 import LoginForm from "../../components/Login/LoginForm";
 
-const _KIOSK_ID = localStorage.getItem("kioskId");
-
 const DashboardPage = () => {
   const auth = useContext(AuthContext);
+  auth.setInterceptors();
+  const axios = auth.getAxiosInstance;
   const [selectedTab, setSelectedTab] = useState(null);
 
-  const submitClickHandler = async (username, password) => {
+  const logoutHandler = async () => {
     try {
-      const response = await fetch("/api/auth/admin/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      await auth.getAxiosInstance.delete(
+        `/api/auth/logout`,
+        {
+          data: { refreshToken: auth.refreshToken },
         },
-        body: JSON.stringify({
-          username: username,
-          password: password,
-        }),
-      });
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      auth.logout();
+      window.location.reload();
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-      const responseData = await response.json();
-
-      if (!response.ok) {
-        alert("For admin only");
-        throw new Error(responseData.message);
-      }
+  const submitClickHandler = async (userid, password) => {
+    try {
+      const response = await axios.post(
+        "/api/auth/admin/login",
+        { userid, password },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
       // console.log(responseData);
-      auth.login(responseData.token);
+      auth.login(response.data.accessToken, response.data.refreshToken);
 
-      username = "";
+      userid = "";
       password = "";
     } catch (err) {
-      console.log(err);
+      console.log(err.response.data.message);
     }
   };
 
@@ -53,7 +65,7 @@ const DashboardPage = () => {
           perform="dashboard-page:visit"
           yes={() => (
             <div>
-              <button onClick={() => auth.logout()}>Logout</button>
+              <button onClick={logoutHandler}>Logout</button>
               <p />
               <h1>Dashboard</h1>
               <button onClick={() => setSelectedTab("kiosks")}>Kiosks</button>
@@ -61,11 +73,11 @@ const DashboardPage = () => {
               {selectedTab === "kiosks" ? (
                 <Kiosks />
               ) : selectedTab === "users" ? (
-                <Users />
+                <Admin />
               ) : undefined}
             </div>
           )}
-          no={() => <Redirect to={`/${_KIOSK_ID}`} />}
+          no={() => <Redirect to={`/`} />}
         />
       )}
     </>

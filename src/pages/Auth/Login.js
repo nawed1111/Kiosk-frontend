@@ -7,7 +7,7 @@ import HomePage from "../Interface/Home";
 // import Scan from "../../components/Scan/Scan";
 import EnterPin from "../../components/Pin/EnterPin";
 import SetupPin from "../../components/Pin/SetupPin";
-import LoginForm from "../../components/Login/LoginForm";
+// import LoginForm from "../../components/Login/LoginForm";
 import Scan from "../../components/Scan/Scan";
 
 function Login(props) {
@@ -18,17 +18,13 @@ function Login(props) {
 
   const tokenHandler = (data) => {
     // console.log(data);
-    if (Object.keys(data).length === 0) {
-      auth.logout();
-      props.activeStataus();
-    } else {
-      if (!auth.isLoggedIn) {
-        auth.login(data.token);
-        setdisplayPin(false);
-      }
+
+    if (!auth.isLoggedIn) {
+      auth.login(data.accessToken, data.refreshToken);
+      setdisplayPin(false);
     }
   };
-
+  /*
   const submitClickHandler = async (username, password) => {
     try {
       const response = await fetch("/api/auth/login", {
@@ -51,67 +47,77 @@ function Login(props) {
       // console.log(responseData);
 
       if (responseData.setupPin) {
-        auth.login(responseData.token);
+        auth.login(responseData.accessToken, responseData.refreshToken);
         setSetupPin(true);
       } else {
-        auth.login(responseData.token);
+        auth.login(responseData.accessToken, responseData.refreshToken);
       }
+
       username = "";
       password = "";
     } catch (err) {
       console.log(err);
     }
   };
-
+*/
   const fetchedUser = useRef();
 
   useEffect(() => {
     const socket = getSocket();
 
-    socket.emit("joinAuthRoom", _KIOSK_ID);
+    // socket.emit("joinAuthRoom", _KIOSK_ID);
 
     socket.on("jwttoken", (data) => {
-      fetchedUser.current = data.userId;
-      console.log(data);
+      fetchedUser.current = data.userid;
+
       if (data.displayPin) setdisplayPin(true);
       else if (data.setupPin) {
-        window.alert("Please login to set up your pin");
         setSetupPin(true);
       }
     });
 
     socket.on("disconnect", () => {
       console.log("Application server disconnected!");
-      socket.on("connect", () => {
-        socket.emit("joinAuthRoom", _KIOSK_ID);
-        console.log("Application server connected back!");
-      });
+      socket.off("joinAuthRoom");
+      // socket.on("connect", () => {
+      //   socket.emit("joinAuthRoom", _KIOSK_ID);
+      //   console.log("Application server connected back!");
+      // });
     });
 
-    // return () => socket.off("jwttoken");
+    socket.on("connect", () => {
+      socket.emit("joinAuthRoom", _KIOSK_ID);
+      console.log("Application server connected!");
+    });
+
+    return () => socket.off("joinAuthRoom");
   }, [_KIOSK_ID]);
 
   return (
     <div>
-      {auth.isLoggedIn && setupPin ? (
-        <SetupPin handleSubmit={setSetupPin} />
-      ) : setupPin ? (
-        <div>
-          <LoginForm handleLogin={submitClickHandler} />
-          <a href={`/${_KIOSK_ID}`}>Go Back</a>
-        </div>
-      ) : displayPin ? (
-        <EnterPin userId={fetchedUser.current} tokenHandler={tokenHandler} />
-      ) : auth.isLoggedIn && !setupPin ? (
+      {auth.isLoggedIn ? (
         <HomePage tokenHandler={tokenHandler} />
+      ) : setupPin ? (
+        <SetupPin
+          userid={fetchedUser.current}
+          handleSubmit={() => {
+            setSetupPin(false);
+            setdisplayPin(true);
+          }}
+        />
+      ) : displayPin ? (
+        <EnterPin userid={fetchedUser.current} tokenHandler={tokenHandler} />
       ) : (
         <div>
           <Scan name="ID Card" hideButton="true" />
-          <p>OR</p>
+          <p />
+          <p />
+          <a href={`/${_KIOSK_ID}`}>Go Back</a>
+          {/* <p>OR</p>
           <div>
             <LoginForm handleLogin={submitClickHandler} />
             <a href={`/${_KIOSK_ID}`}>Go Back</a>
-          </div>
+          </div> */}
         </div>
       )}
     </div>

@@ -7,19 +7,24 @@ import StartPage from "./pages/Interface/Start";
 import ErrorPage from "./pages/Interface/Error";
 
 import { useAuth } from "./hooks/auth-hook";
+import { useAxios } from "./hooks/authService";
 import DashboardPage from "./pages/Dashboard/Dashboard";
 
 function App() {
-  const { token, user, login, logout } = useAuth(); //custom useAuth hook
+  const { accessToken, refreshToken, user, login, logout } = useAuth();
+  const { setInterceptors, getAxiosInstance } = useAxios();
 
   return (
     <AuthContext.Provider
       value={{
-        token,
+        accessToken,
+        refreshToken,
         user,
-        isLoggedIn: !!token,
+        isLoggedIn: !!accessToken,
         login,
         logout,
+        getAxiosInstance,
+        setInterceptors,
       }}
     >
       <BrowserRouter>

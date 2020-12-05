@@ -4,17 +4,17 @@ function LoginForm(props) {
   const loginClickHandler = (event) => {
     event.preventDefault();
     const {
-      target: { username, password },
+      target: { userid, password },
     } = event;
-    props.handleLogin(username.value, password.value);
+    props.handleLogin(userid.value, password.value);
   };
   return (
     <div>
       <h2>Login with your crdentials</h2>
       <form onSubmit={(event) => loginClickHandler(event)}>
         <label>
-          Username:
-          <input name="username" required />
+          User ID:
+          <input name="userid" required />
         </label>
 
         <br />
