@@ -1,36 +1,35 @@
 import React, { useContext } from "react";
-import FilledInstrument from "../../components/Instrument/FilledInstrument";
+import FilledInstrument from "./FilledInstrument";
 
-import { AuthContext } from "../../context/auth-context";
+import { AuthContext } from "../../../context/auth-context";
 
 function RemoveSamplesFromInstrument(props) {
   const auth = useContext(AuthContext);
+  const axios = auth.getAxiosInstance;
 
   const removeSampleFromInstrumentClickHandler = async () => {
     const response = window.confirm("Are you sure?");
     if (response) {
       try {
-        const response = await fetch(
-          "http://localhost:5000/api/test/post-sample-removal",
+        const response = await axios.patch(
+          "/api/test/post-sample-removal",
           {
-            method: "PATCH",
+            testId: props.loadedInstrumentInfo.test._id,
+          },
+          {
             headers: {
               Authorization: "Bearer " + auth.accessToken,
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({
-              testId: props.loadedInstrumentInfo.test._id,
-            }),
           }
         );
-        const responseData = response.json();
-        console.log(responseData);
+
         if (response.status === 403) {
           window.alert("Test still running");
         }
         props.updateHomePage(null);
       } catch (error) {
-        console.log(error);
+        console.log(error.response.data.message);
       }
     }
   };

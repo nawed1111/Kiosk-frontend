@@ -18,14 +18,10 @@ function Login(props) {
 
   const tokenHandler = (data) => {
     // console.log(data);
-    if (Object.keys(data).length === 0) {
-      auth.logout();
-      props.activeStataus();
-    } else {
-      if (!auth.isLoggedIn) {
-        auth.login(data.accessToken, data.refreshToken);
-        setdisplayPin(false);
-      }
+
+    if (!auth.isLoggedIn) {
+      auth.login(data.accessToken, data.refreshToken);
+      setdisplayPin(false);
     }
   };
   /*
@@ -69,27 +65,32 @@ function Login(props) {
   useEffect(() => {
     const socket = getSocket();
 
-    socket.emit("joinAuthRoom", _KIOSK_ID);
+    // socket.emit("joinAuthRoom", _KIOSK_ID);
 
     socket.on("jwttoken", (data) => {
-      fetchedUser.current = data.userId;
+      fetchedUser.current = data.userid;
 
       if (data.displayPin) setdisplayPin(true);
       else if (data.setupPin) {
-        window.alert("Please login to set up your pin");
         setSetupPin(true);
       }
     });
 
     socket.on("disconnect", () => {
       console.log("Application server disconnected!");
-      socket.on("connect", () => {
-        socket.emit("joinAuthRoom", _KIOSK_ID);
-        console.log("Application server connected back!");
-      });
+      socket.off("joinAuthRoom");
+      // socket.on("connect", () => {
+      //   socket.emit("joinAuthRoom", _KIOSK_ID);
+      //   console.log("Application server connected back!");
+      // });
     });
 
-    // return () => socket.off("jwttoken");
+    socket.on("connect", () => {
+      socket.emit("joinAuthRoom", _KIOSK_ID);
+      console.log("Application server connected!");
+    });
+
+    return () => socket.off("joinAuthRoom");
   }, [_KIOSK_ID]);
 
   return (
@@ -97,9 +98,15 @@ function Login(props) {
       {auth.isLoggedIn ? (
         <HomePage tokenHandler={tokenHandler} />
       ) : setupPin ? (
-        <SetupPin handleSubmit={setSetupPin} />
+        <SetupPin
+          userid={fetchedUser.current}
+          handleSubmit={() => {
+            setSetupPin(false);
+            setdisplayPin(true);
+          }}
+        />
       ) : displayPin ? (
-        <EnterPin userId={fetchedUser.current} tokenHandler={tokenHandler} />
+        <EnterPin userid={fetchedUser.current} tokenHandler={tokenHandler} />
       ) : (
         <div>
           <Scan name="ID Card" hideButton="true" />

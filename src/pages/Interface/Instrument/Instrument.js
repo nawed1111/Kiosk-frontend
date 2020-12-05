@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
 
-import { getSocket } from "../../util/socket";
+import { getSocket } from "../../../util/socket";
 
-import Scan from "../../components/Scan/Scan";
-import Timer from "../../components/Timer/Timer";
-import { AuthContext } from "../../context/auth-context";
-
-const _KIOSK_ID = localStorage.getItem("kioskId");
+import Scan from "../../../components/Scan/Scan";
+import Timer from "../../../components/Timer/Timer";
+import { AuthContext } from "../../../context/auth-context";
 
 function Instrument(props) {
+  const _KIOSK_ID = localStorage.getItem("kioskId");
   const auth = useContext(AuthContext);
+  const axios = auth.getAxiosInstance;
   const _isMounted = useRef(true);
   const [samples, setSamples] = useState([]);
   const [doneScanning, setDoneScanning] = useState(false);
@@ -38,23 +38,13 @@ function Instrument(props) {
   const addSampleInputSubmitHandler = async (event) => {
     event.preventDefault();
     const sampleid = event.target.sampleid.value;
-    console.log("Sample ID", sampleid);
+
     try {
-      const response = await fetch(
-        `http://localhost:5000/api/test/${_KIOSK_ID}/${sampleid}`,
-        {
-          method: "GET",
-          // headers: {
-          //   Authorization: "Bearer " + auth.accessToken,
-          // },
-        }
-      );
-      const responseData = await response.json();
-      if (!response.ok) {
-        throw new Error(responseData.message);
-      }
+      const response = await axios.get(`/api/test/${_KIOSK_ID}/${sampleid}`);
+
+      console.log(response.data.message);
     } catch (error) {
-      console.log(error);
+      console.log(error.response.data.message);
     }
   };
 
@@ -63,29 +53,27 @@ function Instrument(props) {
     setTimestamp(timestampOfExecution);
 
     try {
-      const response = await fetch("http://localhost:5000/api/test/run-test", {
-        method: "PUT",
-        headers: {
-          Authorization: "Bearer " + auth.accessToken,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      const response = await axios.put(
+        "/api/test/run-test",
+        {
           instrumentId: props.instrument.instrumentid,
           samples,
           duration: recommendedProp.time / 60,
           timestamp: timestampOfExecution,
           kioskId: _KIOSK_ID,
           user: auth.user,
-        }),
-      });
-      const responseData = await response.json();
-      // console.log(responseData);
-      if (!response.ok) {
-        throw new Error(responseData.message);
-      }
+        },
+        {
+          headers: {
+            Authorization: "Bearer " + auth.accessToken,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log(response.data.message);
       setRunTest(true);
     } catch (err) {
-      console.log(err);
+      console.log(err.response.data.message);
     }
   };
 

@@ -1,5 +1,5 @@
 import React from "react";
-import Timer from "../Timer/Timer";
+import Timer from "../../../components/Timer/Timer";
 
 export default function RunningTests(props) {
   const test = props.test;

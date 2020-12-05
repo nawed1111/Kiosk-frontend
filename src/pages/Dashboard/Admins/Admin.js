@@ -1,49 +1,44 @@
 import React, { useState, useContext, useEffect } from "react";
 
 import { AuthContext } from "../../../context/auth-context";
-import UserForm from "./UserForm";
+import AdminForm from "./AdminForm";
 
 function Users() {
   const auth = useContext(AuthContext);
-
   const [users, setUsers] = useState([]);
 
-  const [selectedUser, setSelectedUser] = useState({
-    userId: "",
-    role: "",
-    firstTimeLogin: true,
-    locked: false,
-  });
+  const [selectedUser, setSelectedUser] = useState({});
+  // userid: "",
+  // role: "",
+  // fanme: "",
+  // lname: "",
+  // email: "",
   const [userOperation, setUserOperation] = useState(false);
 
   useEffect(() => {
     async function helper() {
       try {
-        const response = await fetch("http://localhost:5000/api/auth/users", {
-          method: "GET",
-          headers: {
-            Authorization: "Bearer " + auth.accessToken,
-          },
-        });
-
-        const responseData = await response.json();
-        if (!response.ok) {
-          throw new Error(responseData.message);
-        }
-        // console.log(responseData);
-        setUsers(responseData.users);
+        const response = await auth.getAxiosInstance.get(
+          "/api/auth/admin-list",
+          {
+            headers: {
+              Authorization: "Bearer " + auth.accessToken,
+            },
+          }
+        );
+        setUsers(response.data.users);
       } catch (error) {
-        console.log(error);
+        console.log(error.response);
       }
     }
     helper();
-  }, [auth.accessToken]);
+  }, [auth]);
 
   const renderUsers = users.map((user, index) => (
-    <div key={`${user._id}${index}`}>
+    <div key={`${user.userid}${index}`}>
       <p>
         <strong>({index + 1})</strong>
-        {user.username}
+        {user.userid}
       </p>
       <p>Role: {user.role}</p>
       <button
@@ -63,7 +58,7 @@ function Users() {
       {renderUsers}
       <p />
       {userOperation ? (
-        <UserForm
+        <AdminForm
           user={selectedUser}
           goBack={() => setUserOperation(!userOperation)}
         />
@@ -71,12 +66,7 @@ function Users() {
       <button
         onClick={() => {
           setUserOperation(!userOperation);
-          setSelectedUser({
-            id: "",
-            role: "",
-            firstTimeLogin: true,
-            locked: false,
-          });
+          setSelectedUser({});
         }}
       >
         {userOperation ? "Cancel" : "Create a User"}

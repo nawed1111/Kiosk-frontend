@@ -7,4 +7,6 @@ export const AuthContext = createContext({
   refreshToken: null,
   login: () => {},
   logout: () => {},
+  getAxiosInstance: null,
+  setInterceptors: () => {},
 });

@@ -19,26 +19,22 @@ function Kiosks() {
     let page = 1;
     async function helper() {
       try {
-        const response = await fetch(
-          `http://localhost:5000/api/kiosks?page=${page}`,
+        const response = await auth.getAxiosInstance.get(
+          `/api/kiosks?page=${page}`,
           {
-            method: "GET",
             headers: {
               Authorization: "Bearer " + auth.accessToken,
             },
           }
         );
-        const responseData = await response.json();
-        if (!response.ok) {
-          throw new Error(responseData.message);
-        }
-        setKiosks(responseData.kiosks);
+
+        setKiosks(response.data.kiosks);
       } catch (error) {
         console.log(error);
       }
     }
     helper();
-  }, [auth.token, kioskOperation]);
+  }, [auth, kioskOperation]);
 
   const renderKiosks = kiosks.map((kiosk, index) => (
     <div key={kiosk._id}>

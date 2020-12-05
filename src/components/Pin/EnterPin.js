@@ -1,6 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import { AuthContext } from "../../context/auth-context";
 
 const EnterPin = (props) => {
+  const auth = useContext(AuthContext);
+  const axios = auth.getAxiosInstance;
   const [pin, setPin] = useState("");
 
   const pinInputHandler = (event) => {
@@ -8,28 +11,28 @@ const EnterPin = (props) => {
   };
   const pinSubmitHandler = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/auth/verify-pin", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: props.userId,
+      const response = await axios.post(
+        "/api/auth/verify-pin",
+        {
+          userid: props.userid,
           pin: pin,
-        }),
-      });
-      const responseData = await response.json();
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-      if (!response.ok) {
-        alert(responseData.message);
-        throw new Error(responseData.message);
+      if (response.status !== 200) {
+        throw new Error(response.data.message);
       }
       props.tokenHandler({
-        accessToken: responseData.accessToken,
-        refreshToken: responseData.refreshToken,
+        accessToken: response.data.accessToken,
+        refreshToken: response.data.refreshToken,
       });
     } catch (err) {
-      console.log(err);
+      alert(err.response.data.error.message);
     }
   };
   return (

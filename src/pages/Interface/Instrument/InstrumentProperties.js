@@ -12,24 +12,22 @@ function InstrumentProperties(props) {
   useEffect(() => {
     async function helper() {
       try {
-        const response = await fetch(
-          `http://localhost:5000/api/instruments/instrument/${props.instrument.instrumentid}`,
+        const response = await auth.getAxiosInstance.get(
+          `/api/instruments/instrument/${props.instrument.instrumentid}`,
           {
-            method: "GET",
             headers: {
               Authorization: "Bearer " + auth.accessToken,
             },
           }
         );
-        const responseData = await response.json();
-        if (!response.ok) {
-          throw new Error(responseData.message);
-        }
-        setinstrument(responseData.instrument);
-      } catch (error) {}
+        console.log("Response: ", response);
+        setinstrument(response.data.instrument);
+      } catch (error) {
+        console.log(error);
+      }
     }
     helper();
-  }, [auth.accessToken, props.instrument]);
+  }, [auth, props.instrument]);
 
   return (
     <div>
