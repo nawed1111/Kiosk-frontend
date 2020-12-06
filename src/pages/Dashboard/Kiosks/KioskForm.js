@@ -56,7 +56,7 @@ function KioskForm(props) {
     }
 
     try {
-      const response = await axios(
+      await axios(
         `/api/kiosks/${id}`,
         { kioskId: id, instruments, rfreader },
         {

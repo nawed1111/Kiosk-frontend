@@ -7,7 +7,7 @@ import RemoveSamplesFromInstrumentPage from "./Instrument/RemoveSamplesFromInstr
 // import InstrumentProperties from "../../components/Instrument/InstrumentProperties";
 import RunningTests from "./Instrument/RunningTests";
 
-function Home(props) {
+function Home() {
   const _KIOSK_ID = localStorage.getItem("kioskId");
   const auth = useContext(AuthContext);
   auth.setInterceptors();
@@ -56,6 +56,8 @@ function Home(props) {
       window.location.reload();
     } catch (error) {
       console.log(error);
+      auth.logout();
+      window.location.reload();
     }
   };
 
@@ -134,9 +136,6 @@ function Home(props) {
   return (
     <>
       <nav>
-        {/* <a href={`/${_KIOSK_ID}`} onClick={logoutHandler}>
-          Logout
-        </a> */}
         <button onClick={logoutHandler}>Logout</button>
       </nav>
       {selected ? (

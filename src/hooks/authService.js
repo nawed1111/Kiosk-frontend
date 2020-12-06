@@ -7,9 +7,6 @@ export const useAxios = () => {
   });
 
   const setInterceptors = useCallback(() => {
-    // axios.defaults.headers.common["Authorization"] = token.accessToken;
-    // const storedData = JSON.parse(localStorage.getItem("token"));
-
     getAxiosInstance.interceptors.response.use(
       (response) => {
         return response;
@@ -45,23 +42,24 @@ export const useAxios = () => {
             )
               .then((res) => res.json())
               .then((res) => {
-                if (res.accessToken) {
-                  localStorage.setItem(
-                    "token",
-                    JSON.stringify({
-                      accessToken: res.accessToken,
-                      refreshToken: res.refreshToken,
-                    })
-                  );
-                  originalReq.headers[
-                    "Authorization"
-                  ] = `Bearer ${res.accessToken}`;
-                  return resolve(axios(originalReq));
-                } else if (res.error.status === 401) {
+                if (res.error && res.error.status === 401) {
                   localStorage.removeItem("token");
                   window.location.reload();
                   return;
                 }
+                console.log("***Kiosk token generated using Refresh Token***");
+
+                localStorage.setItem(
+                  "token",
+                  JSON.stringify({
+                    accessToken: res.accessToken,
+                    refreshToken: res.refreshToken,
+                  })
+                );
+                originalReq.headers[
+                  "Authorization"
+                ] = `Bearer ${res.accessToken}`;
+                return resolve(axios(originalReq));
               });
           }
 
