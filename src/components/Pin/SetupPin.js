@@ -1,22 +1,35 @@
 import React, { useState, useContext } from "react";
 import { AuthContext } from "../../context/auth-context";
+import { Grid, Image, Header } from "semantic-ui-react";
+import Numpad from "./Numpad";
+
+import Loading from "../../components/Loader/Loading";
+import signSuccessfullImage from "../../assets/images/sign-successfull.png";
 
 function SetupPin(props) {
   const auth = useContext(AuthContext);
   const axios = auth.getAxiosInstance;
   const [pin, setPin] = useState("");
-  const [confirmPin, setConfirmPin] = useState("");
+  const [status, setstatus] = useState({
+    loading: false,
+    signed: false,
+  });
 
-  const submitClickHandler = async (event) => {
-    event.preventDefault();
-    if (pin !== confirmPin) return;
+  const timeout = (ms) => {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  };
+
+  const submitClickHandler = async (value) => {
+    if (pin !== value) return window.alert("Pin do not match");
+
+    setstatus({ ...status, loading: true });
 
     try {
       const response = await axios.patch(
         `/api/auth/update-user/${props.userid}`,
         {
           pin,
-          confirmPin,
+          confirmPin: value,
         },
         {
           headers: {
@@ -25,74 +38,49 @@ function SetupPin(props) {
           },
         }
       );
-      if (response.status !== 200) {
-        throw new Error(response.message);
-      }
 
       setPin(null);
-      setConfirmPin(null);
-      props.handleSubmit();
+
+      setstatus({ loading: false, signed: true });
+      await timeout(2000);
+      setstatus({ ...status, signed: false });
+
+      props.tokenHandler({
+        accessToken: response.data.accessToken,
+        refreshToken: response.data.refreshToken,
+      });
+      props.setupPin();
     } catch (error) {
       console.log(error);
     }
   };
 
-  const pinChangeHandler = (event) => {
-    event.preventDefault();
-    if (isNaN(event.target.value)) return;
-
-    if (event.target.name === "pin") {
-      setPin(event.target.value);
-    } else {
-      setConfirmPin(event.target.value);
-      if (pin !== event.target.value)
-        console.log("Confirm pin do not match with pin");
-    }
-  };
-
   return (
-    <div>
-      <form onSubmit={(event) => submitClickHandler(event)}>
-        <label>
-          PIN:
-          <input
-            type="password"
-            name="pin"
-            required
-            pattern="[0-9]*"
-            // inputmode="numeric"
-            maxLength="4"
-            minLength="4"
-            size="4"
-            value={String(pin)}
-            onChange={(event) => pinChangeHandler(event)}
-          />
-        </label>
+    <Grid>
+      <Grid.Column>
+        <Header inverted as="h1">
+          Welcome to Kiosk. Please set up your pin
+        </Header>
 
-        <br />
-        <label>
-          Confirm PIN:
-          <input
-            name="confirmPin"
-            type="password"
-            required
-            maxLength="4"
-            minLength="4"
-            size="4"
-            pattern="[0-9]*"
-            // inputmode="numeric"
-            value={String(confirmPin)}
-            onChange={(event) => pinChangeHandler(event)}
+        {status.signed ? (
+          <Image src={signSuccessfullImage} centered />
+        ) : status.loading ? (
+          <Loading message="Signing up..." />
+        ) : !pin ? (
+          <Numpad
+            heading="Enter 4-digit PIN"
+            onpinSubmit={(value) => setPin(value)}
+            cancel={() => props.setupPin()}
           />
-        </label>
-        <br />
-        <input
-          type="submit"
-          value="Submit"
-          disabled={pin !== confirmPin || String(pin).length < 4}
-        />
-      </form>
-    </div>
+        ) : (
+          <Numpad
+            heading="Re-Enter 4-digit PIN"
+            onpinSubmit={(value) => submitClickHandler(value)}
+            cancel={() => props.setupPin()}
+          />
+        )}
+      </Grid.Column>
+    </Grid>
   );
 }
 

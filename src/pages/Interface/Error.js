@@ -1,11 +1,12 @@
-import React from 'react'
+import React from "react";
+import { Segment } from "semantic-ui-react";
 
 function Error() {
-    return (
-        <div>
-            This route is not valid!
-        </div>
-    )
+  return (
+    <Segment padded>
+      <p style={{ color: "grey" }}> This route is not valid</p>
+    </Segment>
+  );
 }
 
-export default Error
+export default Error;

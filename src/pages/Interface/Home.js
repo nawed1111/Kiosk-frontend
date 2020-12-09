@@ -6,6 +6,20 @@ import InstrumentPage from "./Instrument/Instrument";
 import RemoveSamplesFromInstrumentPage from "./Instrument/RemoveSamplesFromInstrument";
 // import InstrumentProperties from "../../components/Instrument/InstrumentProperties";
 import RunningTests from "./Instrument/RunningTests";
+import Loading from "../../components/Loader/Loading";
+
+import { Grid, Button, Header, Card, Icon, Image } from "semantic-ui-react";
+
+import logo from "../../assets/images/logo.png";
+
+const style = {
+  cardBody: {
+    color: "#FFFFFF",
+  },
+  status: {
+    color: "#FFC300",
+  },
+};
 
 function Home() {
   const _KIOSK_ID = localStorage.getItem("kioskId");
@@ -13,6 +27,7 @@ function Home() {
   auth.setInterceptors();
   const [instrument, setInstrument] = useState(null);
   const [selected, setSelected] = useState(false);
+  const [loading, setloading] = useState(false);
 
   const [instrumentsofKiosk, setInstrumentsOfKiosk] = useState({
     instruments: [],
@@ -24,22 +39,22 @@ function Home() {
     instrumentId: null,
   });
 
-  const instrumentHandler = (data) => {
-    setInstrument(data);
-  };
+  // const instrumentHandler = (data) => {
+  //   setInstrument(data);
+  // };
 
   const openLoadedInstrumentHandler = (instrumentId) => {
     setLoadedIntrument({ status: !openLoadedInstrument.status, instrumentId });
     setSelected(false);
     setInstrument(null);
   };
-  const submitHandler = () => {
-    if (instrument) {
-      setSelected(true);
-    }
+  const onInstrumentClickHandler = (data) => {
+    setInstrument(data);
+    setSelected(true);
   };
 
   const logoutHandler = async () => {
+    setloading(true);
     try {
       await auth.getAxiosInstance.delete(
         `/api/auth/logout`,
@@ -52,10 +67,12 @@ function Home() {
           },
         }
       );
+      setloading(false);
       auth.logout();
       window.location.reload();
     } catch (error) {
       console.log(error);
+      // setloading(false);
       auth.logout();
       window.location.reload();
     }
@@ -64,11 +81,14 @@ function Home() {
   const gobackToHomePage = () => {
     setSelected(false);
     setInstrument(null);
+    if (openLoadedInstrument.status)
+      setLoadedIntrument({ status: !openLoadedInstrument.status });
   };
 
   useEffect(() => {
     if (!selected) {
       async function helper() {
+        setloading(true);
         try {
           const response = await auth.getAxiosInstance.get(
             `/api/instruments/${_KIOSK_ID}`,
@@ -78,11 +98,14 @@ function Home() {
               },
             }
           );
+          setloading(false);
           setInstrumentsOfKiosk({
             instruments: response.data.instruments,
             runningTests: response.data.testsRunning,
           });
         } catch (err) {
+          setloading(false);
+          alert(err.response.data.message);
           console.log(err.response.data.message);
         }
       }
@@ -92,66 +115,134 @@ function Home() {
 
   const renderInstruments = instrumentsofKiosk.instruments.map(
     (instrument, index) => (
-      <div key={`${instrument.instrumentid}${index}`}>
-        <input
-          type="radio"
-          value={instrument.instrumentid}
-          name="instrument"
-          onClick={instrumentHandler.bind(this, instrument)}
-          hidden={instrument.status === "inuse"}
-        />
-        <p>{instrument.instrumentid}</p>
-        <p>{instrument.name}</p>
-        <p>{instrument.status}</p>
-      </div>
+      <Grid.Column
+        key={`${instrument.instrumentid}${index}`}
+        textAlign="center"
+      >
+        <Card
+          centered
+          onClick={
+            instrument.status === "available"
+              ? onInstrumentClickHandler.bind(this, instrument)
+              : undefined
+          }
+          style={{
+            backgroundColor:
+              instrument.status === "inuse" ? "#430F32" : "#006A4E",
+            marginBottom: "1em",
+          }}
+        >
+          <Card.Content>
+            <Card.Header style={style.cardBody}>
+              {instrument.instrumentid}
+            </Card.Header>
+            <Card.Description style={style.cardBody}>
+              {instrument.name}
+            </Card.Description>
+            <Card.Meta style={style.status}>{instrument.status}</Card.Meta>
+          </Card.Content>
+        </Card>
+      </Grid.Column>
     )
   );
 
-  const TestsRunning = instrumentsofKiosk.runningTests.map((test, index) => (
-    <div key={`${test._id}${index}`}>
+  const testsRunning = instrumentsofKiosk.runningTests.map((test, index) => (
+    <Grid.Column key={`${test._id}${index}`} textAlign="center">
       <RunningTests
         test={test}
         openLoadedInstrumentHandler={openLoadedInstrumentHandler}
       />
-    </div>
+    </Grid.Column>
   ));
 
   const HomePage = (
-    <div>
-      <h1>Connected Instruments </h1>
+    <Grid>
+      <Grid.Row centered>
+        <Header as="h2" inverted>
+          CONNECTED INSTRUMENTS:
+        </Header>
+      </Grid.Row>
+      <Grid.Row centered columns={3}>
+        {renderInstruments}
+      </Grid.Row>
 
-      {renderInstruments}
-      <p />
-      <button disabled={!instrument} onClick={submitHandler}>
-        Submit
-      </button>
-      <h2>
-        Instruments Running Test: {instrumentsofKiosk.runningTests.length}
-      </h2>
-      {TestsRunning}
-      <p />
-    </div>
+      <Grid.Row centered>
+        <Header as="h2" inverted>
+          TEST RUNNING IN: {instrumentsofKiosk.runningTests.length} INSTRUMENT/S
+        </Header>
+      </Grid.Row>
+      <Grid.Row centered columns={3}>
+        {testsRunning}
+      </Grid.Row>
+    </Grid>
   );
 
   return (
     <>
-      <nav>
-        <button onClick={logoutHandler}>Logout</button>
-      </nav>
-      {selected ? (
-        <InstrumentPage instrument={instrument} deSelect={gobackToHomePage} />
-      ) : openLoadedInstrument.status ? (
-        <RemoveSamplesFromInstrumentPage
-          loadedInstrumentInfo={{
-            test: instrumentsofKiosk.runningTests.find(
-              (test) => test.instrumentId === openLoadedInstrument.instrumentId
-            ),
-          }}
-          stayAtLoadedInstrumentPage={setLoadedIntrument}
-          updateHomePage={openLoadedInstrumentHandler}
-        />
+      {loading ? (
+        <Loading message="Fetching Data..." />
       ) : (
-        HomePage
+        <>
+          <Grid>
+            <Grid.Row columns="2">
+              <Grid.Column textAlign="left">
+                <Header
+                  inverted
+                  style={{ fontFamily: "Roboto", fontSize: "35px" }}
+                >
+                  {_KIOSK_ID.toUpperCase()}
+                </Header>
+              </Grid.Column>
+              <Grid.Column textAlign="right">
+                <Button
+                  basic
+                  color="blue"
+                  size="huge"
+                  circular
+                  onClick={logoutHandler}
+                >
+                  Logout
+                </Button>
+              </Grid.Column>
+            </Grid.Row>
+          </Grid>
+          {selected ? (
+            <InstrumentPage
+              instrument={instrument}
+              deSelect={gobackToHomePage}
+            />
+          ) : openLoadedInstrument.status ? (
+            <RemoveSamplesFromInstrumentPage
+              loadedInstrumentInfo={{
+                test: instrumentsofKiosk.runningTests.find(
+                  (test) =>
+                    test.instrumentId === openLoadedInstrument.instrumentId
+                ),
+              }}
+              stayAtLoadedInstrumentPage={setLoadedIntrument}
+              updateHomePage={openLoadedInstrumentHandler}
+            />
+          ) : (
+            HomePage
+          )}
+          <Grid>
+            <Grid.Row columns="2">
+              <Grid.Column textAlign="left">
+                <Button
+                  circular
+                  basic
+                  color="blue"
+                  size="huge"
+                  icon={<Icon size="large" name="long arrow alternate left" />}
+                  onClick={gobackToHomePage}
+                />
+              </Grid.Column>
+              <Grid.Column textAlign="right" verticalAlign="bottom">
+                <Image src={logo} avatar alt="Logo" size="mini" />
+              </Grid.Column>
+            </Grid.Row>
+          </Grid>
+        </>
       )}
     </>
   );

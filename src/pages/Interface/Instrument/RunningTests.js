@@ -1,26 +1,30 @@
 import React from "react";
 import Timer from "../../../components/Timer/Timer";
+import { Card } from "semantic-ui-react";
+
+const style = {
+  cardBody: {
+    color: "#FFFFFF",
+  },
+};
 
 export default function RunningTests(props) {
   const test = props.test;
 
   return (
-    <div key={`${test.id}`}>
-      <p>Instrument Id: {test.instrumentId}</p>
-      <p>Number of samples: {test.samples.length} </p>
-      <p>Test duration: {test.duration} mins</p>
-      <p>Test Started: {test.doneOn.split("GMT")[0]}</p>
-      <p>Time remaining: </p>
-      <Timer minutes={test.duration} timestamp={test.timestamp} />
-      <p>Test done by: {test.doneBy}</p>
-      <button
-        onClick={props.openLoadedInstrumentHandler.bind(
-          this,
-          test.instrumentId
-        )}
-      >
-        Remove Now
-      </button>
-    </div>
+    <Card
+      centered
+      style={{ marginBottom: "1em", backgroundColor: "#536C78" }}
+      onClick={props.openLoadedInstrumentHandler.bind(this, test.instrumentId)}
+    >
+      <Card.Content>
+        <Card.Header style={style.cardBody}>{test.instrumentId}</Card.Header>
+        {/* <Card.Meta>{test.doneOn.split("GMT")[0]}</Card.Meta> */}
+        <Card.Description style={style.cardBody}>
+          Number of samples: {test.samples.length}
+          <Timer minutes={test.duration} timestamp={test.timestamp} />
+        </Card.Description>
+      </Card.Content>
+    </Card>
   );
 }
