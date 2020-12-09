@@ -130,8 +130,10 @@ function Instrument(props) {
           ) {
             flag = true;
             return window.alert(
-              `Please scan samples which is to be stored at ${recommendedProp.temp}${recommendedProp.tempUnit} 
-              for ${recommendedProp.time/60} mins only.`
+              `Please scan samples which is to be stored at ${
+                recommendedProp.temp
+              }${recommendedProp.tempUnit} 
+              for ${recommendedProp.time / 60} mins only.`
             );
           }
         });
@@ -143,7 +145,7 @@ function Instrument(props) {
       _isMounted.current = false;
       socket.off("scannedSample");
     };
-  }, [samples, doneScanning]);
+  }, [samples, doneScanning, recommendedProp]);
 
   useEffect(() => {
     if (samples.length === 1) {
