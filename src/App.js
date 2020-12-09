@@ -1,5 +1,7 @@
 import React from "react";
 import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
+import { MediaContextProvider } from "./util/media";
+import "./App.css";
 
 import { AuthContext } from "./context/auth-context";
 
@@ -10,38 +12,46 @@ import { useAuth } from "./hooks/auth-hook";
 import { useAxios } from "./hooks/authService";
 import DashboardPage from "./pages/Dashboard/Dashboard";
 
+import { Container, Segment } from "semantic-ui-react";
+
 function App() {
   const { accessToken, refreshToken, user, login, logout } = useAuth();
   const { setInterceptors, getAxiosInstance } = useAxios();
 
   return (
-    <AuthContext.Provider
-      value={{
-        accessToken,
-        refreshToken,
-        user,
-        isLoggedIn: !!accessToken,
-        login,
-        logout,
-        getAxiosInstance,
-        setInterceptors,
-      }}
-    >
-      <BrowserRouter>
-        <Switch>
-          <Route exact path="/admin">
-            <DashboardPage />
-          </Route>
-          <Route exact path="/:kid">
-            <StartPage />
-          </Route>
-          <Route path="/">
-            <ErrorPage />
-          </Route>
-          <Redirect to="/" />
-        </Switch>
-      </BrowserRouter>
-    </AuthContext.Provider>
+    <MediaContextProvider>
+      <AuthContext.Provider
+        value={{
+          accessToken,
+          refreshToken,
+          user,
+          isLoggedIn: !!accessToken,
+          login,
+          logout,
+          getAxiosInstance,
+          setInterceptors,
+        }}
+      >
+        <Container textAlign="center">
+          <Segment padded style={{ backgroundColor: "#0F2B43" }}>
+            <BrowserRouter>
+              <Switch>
+                <Route exact path="/admin">
+                  <DashboardPage />
+                </Route>
+                <Route exact path="/:kid">
+                  <StartPage />
+                </Route>
+                <Route path="/">
+                  <ErrorPage />
+                </Route>
+                <Redirect to="/" />
+              </Switch>
+            </BrowserRouter>
+          </Segment>
+        </Container>
+      </AuthContext.Provider>
+    </MediaContextProvider>
   );
 }
 

@@ -4,21 +4,19 @@ import { AuthContext } from "../../context/auth-context";
 import { getSocket } from "../../util/socket";
 
 import HomePage from "../Interface/Home";
-// import Scan from "../../components/Scan/Scan";
 import EnterPin from "../../components/Pin/EnterPin";
 import SetupPin from "../../components/Pin/SetupPin";
-// import LoginForm from "../../components/Login/LoginForm";
 import Scan from "../../components/Scan/Scan";
 
-function Login(props) {
+import { Icon, Grid, Header } from "semantic-ui-react";
+
+function Login() {
   const _KIOSK_ID = localStorage.getItem("kioskId");
   const auth = useContext(AuthContext);
   const [setupPin, setSetupPin] = useState(false);
   const [displayPin, setdisplayPin] = useState(false);
 
   const tokenHandler = (data) => {
-    // console.log(data);
-
     if (!auth.isLoggedIn) {
       auth.login(data.accessToken, data.refreshToken);
       setdisplayPin(false);
@@ -93,32 +91,46 @@ function Login(props) {
     return () => socket.off("joinAuthRoom");
   }, [_KIOSK_ID]);
 
+  const loginPage = (
+    <Grid padded centered>
+      <Grid.Row>
+        <Header inverted style={{ fontFamily: "Roboto", fontSize: "40px" }}>
+          {_KIOSK_ID.toUpperCase()}
+        </Header>
+      </Grid.Row>
+      <Grid.Row>
+        <Scan name="BADGE CARD" hideButton="true" />
+      </Grid.Row>
+      <Grid.Row>
+        <Icon
+          name="arrow alternate circle left outline"
+          size="huge"
+          link
+          inverted
+          onClick={() => window.location.reload()}
+        />
+      </Grid.Row>
+    </Grid>
+  );
+
   return (
     <div>
       {auth.isLoggedIn ? (
-        <HomePage tokenHandler={tokenHandler} />
+        <HomePage />
       ) : setupPin ? (
         <SetupPin
           userid={fetchedUser.current}
-          handleSubmit={() => {
-            setSetupPin(false);
-            setdisplayPin(true);
-          }}
+          tokenHandler={tokenHandler}
+          setupPin={() => setSetupPin(false)}
         />
       ) : displayPin ? (
-        <EnterPin userid={fetchedUser.current} tokenHandler={tokenHandler} />
+        <EnterPin
+          userid={fetchedUser.current}
+          tokenHandler={tokenHandler}
+          onCancel={() => setdisplayPin(false)}
+        />
       ) : (
-        <div>
-          <Scan name="ID Card" hideButton="true" />
-          <p />
-          <p />
-          <a href={`/${_KIOSK_ID}`}>Go Back</a>
-          {/* <p>OR</p>
-          <div>
-            <LoginForm handleLogin={submitClickHandler} />
-            <a href={`/${_KIOSK_ID}`}>Go Back</a>
-          </div> */}
-        </div>
+        loginPage
       )}
     </div>
   );

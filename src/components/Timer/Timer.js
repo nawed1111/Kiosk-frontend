@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Header, Icon } from "semantic-ui-react";
 
 function Timer(props) {
   const calculateTimeLeft = () => {
@@ -10,9 +11,9 @@ function Timer(props) {
     if (difference > 0) {
       timeLeft = {
         days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-        minutes: Math.floor((difference / 1000 / 60) % 60),
-        seconds: Math.floor((difference / 1000) % 60),
+        hrs: Math.floor((difference / (1000 * 60 * 60)) % 24),
+        mins: Math.floor((difference / 1000 / 60) % 60),
+        secs: Math.floor((difference / 1000) % 60),
       };
     }
 
@@ -43,9 +44,15 @@ function Timer(props) {
   });
 
   return (
-    <div>
-      {timerComponents.length ? timerComponents : <span>Test Completed</span>}
-    </div>
+    <Header as="h3" style={{color: "#FFC300"}}>
+      {timerComponents.length ? (
+        <div>
+          <Icon name="hourglass half" /> {timerComponents}
+        </div>
+      ) : (
+        <span>Test Completed</span>
+      )}
+    </Header>
   );
 }
 
