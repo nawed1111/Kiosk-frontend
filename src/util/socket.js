@@ -3,10 +3,9 @@ let client;
 
 export const getSocket = () => {
   if (!client) {
-    client = openSocket("http://localhost:5000", {
+    client = openSocket(`${process.env.REACT_APP_KIOSK_BACKEND_BASEURL}`, {
       transports: ["websocket"],
     });
   }
   return client;
 };
-

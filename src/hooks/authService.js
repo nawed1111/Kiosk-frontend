@@ -3,7 +3,7 @@ import axios from "axios";
 
 export const useAxios = () => {
   const getAxiosInstance = axios.create({
-    baseURL: "http://localhost:5000",
+    baseURL: `${process.env.REACT_APP_KIOSK_BACKEND_BASEURL}`,
   });
 
   const setInterceptors = useCallback(() => {
@@ -27,7 +27,7 @@ export const useAxios = () => {
             originalReq._retry = true;
 
             return fetch(
-              "http://localhost:5000/api/auth/refresh-token",
+              `${process.env.REACT_APP_KIOSK_BACKEND_BASEURL}/api/auth/refresh-token`,
 
               {
                 method: "POST",
