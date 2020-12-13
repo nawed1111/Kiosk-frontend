@@ -4,14 +4,12 @@ import { useState, useCallback, useEffect } from "react";
 // let logoutTimer;
 
 export const useAuth = () => {
-  const [accessToken, setaccessToken] = useState(null);
-  const [refreshToken, setrefreshToken] = useState(null);
+  const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
   // const [tokenExpirationDate, setTokenExpirationDate] = useState(null);
 
   const login = useCallback((accessToken, refreshToken) => {
-    setaccessToken(accessToken);
-    setrefreshToken(refreshToken);
+    setToken(accessToken);
     // Decoding token to access the payload data and set user
     const payload = jwtDecode(accessToken);
     // console.log("Payload", payload);
@@ -32,8 +30,7 @@ export const useAuth = () => {
 
   const logout = useCallback(() => {
     console.log("Logout");
-    setaccessToken(null);
-    setrefreshToken(null);
+    setToken(null);
     setUser(null);
     // setTokenExpirationDate(null);
     localStorage.removeItem("token");
@@ -66,5 +63,5 @@ export const useAuth = () => {
     }
   }, [login]);
 
-  return { user, accessToken, refreshToken, login, logout };
+  return { user, token, login, logout };
 };

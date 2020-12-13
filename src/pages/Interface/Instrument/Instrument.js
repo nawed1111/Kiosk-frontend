@@ -1,12 +1,13 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import axios from "../../../util/axios";
 
 import { getSocket } from "../../../util/socket";
 
 import Scan from "../../../components/Scan/Scan";
 import Timer from "../../../components/Timer/Timer";
 import Loading from "../../../components/Loader/Loading";
+import Alert from "../../../components/Alert/Alert";
 
-import { AuthContext } from "../../../context/auth-context";
 import {
   Grid,
   Header,
@@ -19,16 +20,28 @@ import {
   List,
   Segment,
   Label,
+  Confirm,
 } from "semantic-ui-react";
 
 import sampleImage from "../../../assets/images/sample.png";
 import orImage from "../../../assets/images/OR.png";
-// import deleteImage from "../../../assets/images/delete.png";
+
+const style = {
+  list: {
+    cursor: "pointer",
+  },
+  listHeader: {
+    color: "grey",
+    fontSize: "18px",
+  },
+  listContent: {
+    color: "grey",
+    fontSize: "12px",
+  },
+};
 
 function Instrument(props) {
   const _KIOSK_ID = localStorage.getItem("kioskId");
-  const auth = useContext(AuthContext);
-  const axios = auth.getAxiosInstance;
   const _isMounted = useRef(true);
   const [samples, setSamples] = useState([]);
   const [doneScanning, setDoneScanning] = useState(false);
@@ -41,8 +54,18 @@ function Instrument(props) {
   const [runTest, setRunTest] = useState(false);
   const [timestamp, setTimestamp] = useState();
   const [loading, setloading] = useState(false);
+  const [rerender, setrerender] = useState(false);
+  const [alert, setalert] = useState({
+    hide: true,
+    content: "",
+  });
+  const [open, setopen] = useState({
+    status: false,
+    sampleid: "",
+  });
 
   const doneClickHandler = () => {
+    setalert({ hide: true, content: "" });
     if (samples.length < 1) window.alert("Add atleast one sample!");
     else {
       setDoneScanning(!doneScanning);
@@ -59,20 +82,23 @@ function Instrument(props) {
 
       setloading(false);
     } catch (error) {
-      console.log(error.response.data.message);
+      console.log(error);
       setloading(false);
-      alert(error.response.data.message);
+      if (error.response)
+        return window.alert(error.response.data.error.message);
+      window.alert("Possible error- Server not connected! Contact admin");
     }
   };
-  /******************Delete a Sample 
+
   const removeASampleHandler = useCallback(
     (sampleid) => {
       const index = samples.findIndex((sample) => sample.sampleid === sampleid);
-      // samples.splice(index, 1); 
+      samples.splice(index, 1);
+      setrerender(!rerender);
+      if (samples.length === 0) setDoneScanning(false);
     },
-    [samples]
+    [samples, rerender]
   );
-******************/
 
   const runTestHandler = async () => {
     const timestampOfExecution = new Date().getTime();
@@ -81,7 +107,7 @@ function Instrument(props) {
     setloading(true);
 
     try {
-      await axios.put(
+      await axios.post(
         "/api/test/run-test",
         {
           instrumentId: props.instrument.instrumentid,
@@ -89,11 +115,9 @@ function Instrument(props) {
           duration: recommendedProp.time / 60,
           timestamp: timestampOfExecution,
           kioskId: _KIOSK_ID,
-          user: auth.user,
         },
         {
           headers: {
-            Authorization: "Bearer " + auth.accessToken,
             "Content-Type": "application/json",
           },
         }
@@ -101,13 +125,15 @@ function Instrument(props) {
       setloading(false);
       setRunTest(true);
     } catch (err) {
-      console.log(err.response.data.message);
+      console.log(err);
       setloading(false);
-      alert(err.response.data.message);
+      if (err.response) return window.alert(err.response.data.error.message);
+      window.alert("Possible error- Server not connected! Contact admin");
     }
   };
 
   const goBackToHomePage = () => {
+    props.updateInstrumentStatus();
     props.deSelect();
   };
 
@@ -117,11 +143,16 @@ function Instrument(props) {
     if (!doneScanning) {
       socket.on("scannedSample", (data) => {
         let flag = false;
+        setalert({ hide: true });
         setloading(false);
         samples.forEach((sample) => {
           if (sample.sampleid === data.sampleid) {
             flag = true;
-            return window.alert(`Sample ${data.sampleid} is already scanned.`);
+            // return window.alert(`Sample ${data.sampleid} is already scanned.`);
+            return setalert({
+              hide: false,
+              content: `Sample ${data.sampleid} is already scanned.`,
+            });
           } else if (
             sample.recomtemp !== data.recomtemp ||
             sample.recomtempunits !== data.recomtempunits ||
@@ -129,12 +160,19 @@ function Instrument(props) {
             sample.recomdurationunits !== data.recomdurationunits
           ) {
             flag = true;
-            return window.alert(
-              `Please scan samples which is to be stored at ${
+            // return window.alert(
+            //   `Please scan samples which is to be stored at ${
+            //     recommendedProp.temp
+            //   }${recommendedProp.tempUnit}
+            //   for ${recommendedProp.time / 60} mins only.`
+            // );
+            return setalert({
+              hide: false,
+              content: `Please scan samples which is to be stored at ${
                 recommendedProp.temp
               }${recommendedProp.tempUnit} 
-              for ${recommendedProp.time / 60} mins only.`
-            );
+                for ${recommendedProp.time / 60} mins only.`,
+            });
           }
         });
         if (!flag) setSamples(samples.concat(data));
@@ -165,7 +203,7 @@ function Instrument(props) {
         tempUnit: firstSample.recomtempunits,
       });
     }
-  }, [samples]);
+  }, [samples, rerender]);
 
   const renderSamples = samples.map((sample, index) => (
     <List.Item key={`${sample.sampleid}${index}`}>
@@ -177,26 +215,29 @@ function Instrument(props) {
   ));
 
   const renderSamplesInReviewPage = samples.map((sample, index) => (
-    <List.Item key={`${sample.sampleid}${index}`}>
-      <Image size="mini" src={sampleImage} floated="left" centered />
-      {/* <Button
-            basic
-            circular
-            size="tiny"
-            inverted
-            floated="right"
-            onClick={removeASampleHandler.bind(this, sample.sampleid)}
-          >
-            <Image size="mini" src={deleteImage} centered />
-          </Button> */}
-
-      <List.Content>
-        <List.Header
-          style={{ color: "white", fontSize: "25px", marginTop: ".5em" }}
-        >
-          {sample.sampleid}
-        </List.Header>
-      </List.Content>
+    <List.Item
+      key={`${sample.sampleid}${index}`}
+      onClick={() => setopen({ status: true, sampleid: sample.sampleid })}
+    >
+      <Segment stacked textAlign="left">
+        <Button
+          basic
+          circular
+          color="teal"
+          size="mini"
+          floated="right"
+          icon={<Icon name="delete" color="teal" />}
+        />
+        <List.Content>
+          <List.Header style={style.listHeader}>
+            <Image size="mini" src={sampleImage} />
+            {sample.sampleid.toUpperCase()}
+          </List.Header>
+          <List.Description style={style.listContent}>
+            STATUS: {sample.samplestatus.toUpperCase()}
+          </List.Description>
+        </List.Content>
+      </Segment>
     </List.Item>
   ));
 
@@ -225,6 +266,7 @@ function Instrument(props) {
                   type="text"
                   name="sampleid"
                   placeholder="SAMPLE ID"
+                  onChange={() => setalert({ hide: true })}
                   required
                 />
                 <Button
@@ -235,12 +277,10 @@ function Instrument(props) {
                 />
               </Form.Field>
             </Form>
+            <Alert hideError={alert.hide} content={alert.content} />
             {samples.length > 0 ? (
               <Container textAlign="center" style={{ marginTop: "2em" }}>
                 <RecommendedProperties context="Samples to be stored at" />
-                {/* <Header as="h2" color="grey">
-                  SCANNED SAMPLES:
-                </Header> */}
                 <Grid centered>
                   <Grid.Row>
                     <List horizontal size="huge">
@@ -274,28 +314,6 @@ function Instrument(props) {
       </Divider>
     </Segment>
   );
-  /***************For Testing only
-  const RenderSamplesForTesting = () => {
-    return (
-      <List.Item>
-        <Image size="mini" src={sampleImage} floated="left" centered />
-
-        <List.Content>
-          <List.Header
-            style={{
-              color: "grey",
-              fontSize: "25px",
-              marginTop: ".5em",
-            }}
-          >
-            S-0003
-          </List.Header>
-        </List.Content>
-      </List.Item>
-    );
-  };
-
-*************/
 
   const ReviewPage = (
     <Segment basic padded>
@@ -304,23 +322,24 @@ function Instrument(props) {
           <RecommendedProperties context="Samples to be stored at" />
         </Grid.Row>
         <Grid.Row>
-          <List horizontal size="medium">
+          <List horizontal style={style.list}>
             {renderSamplesInReviewPage}
-            {/*******************For Testing**********************/}
-
-            {/***********************************************/}
           </List>
         </Grid.Row>
+        <Confirm
+          open={open.status}
+          content={`Please confirm if you want to remove sample ${open.sampleid}`}
+          cancelButton="Cancel"
+          confirmButton="Yes"
+          onCancel={() => setopen({ status: false, sampleid: "" })}
+          size="mini"
+          onConfirm={() => {
+            removeASampleHandler(open.sampleid);
+            setopen({ status: false, sampleid: "" });
+          }}
+        />
         <p>
           Want to add more samples?{"    "}
-          {/* <Button
-            basic
-            color="teal"
-            size="mini"
-            circular
-            onClick={doneClickHandler}
-            icon={<Icon name="arrow left"></Icon>}
-          ></Button> */}
           <Icon
             color="teal"
             size="large"

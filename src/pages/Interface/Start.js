@@ -1,5 +1,6 @@
 import React, { useState, useContext } from "react";
 import { Link } from "react-router-dom";
+import axios from "../../util/axios";
 
 import LoginPage from "../Auth/Login";
 import Loading from "../../components/Loader/Loading";
@@ -20,7 +21,6 @@ function Start() {
   const _KIOSK_ID = localStorage.getItem("kioskId");
 
   const auth = useContext(AuthContext);
-  const axios = auth.getAxiosInstance;
 
   const [active, setActive] = useState(false);
   const [loading, setloading] = useState(false);
@@ -34,7 +34,11 @@ function Start() {
       setActive(true);
     } catch (err) {
       setloading(false);
-      window.alert("Possible error- server disconnected. Contact admin");
+      console.log(err);
+      if (err.response) {
+        return window.alert(err.response.data.error.message);
+      }
+      window.alert("Possible error- Server not connected! Contact admin");
     }
   };
 

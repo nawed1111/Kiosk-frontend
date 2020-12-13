@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+
+import Alert from "../Alert/Alert";
+
 import { Grid, Table, Icon, Input, Button, Header } from "semantic-ui-react";
 
 function Numpad(props) {
@@ -18,23 +21,25 @@ function Numpad(props) {
     }
   };
 
-  const NumpadValue = (props) => {
-    const pinChnageHandler = (event) => {
-      if (pin.length === 4) {
-        return pinSubmitHandler();
-      }
-      setpin(pin.concat(event.target.value));
-    };
+  const pinChnageHandler = (event) => {
+    props.sethideError();
+    if (pin.length === 4) {
+      return pinSubmitHandler();
+    }
+    setpin(pin.concat(event.target.value));
+  };
+
+  const NumpadValue = ({ value }) => {
     return (
       <Button
-        value={props.value}
+        value={value}
         basic
         color="blue"
         inverted
         size="huge"
         onClick={(event) => pinChnageHandler(event)}
       >
-        {props.value}
+        {value}
       </Button>
     );
   };
@@ -53,11 +58,14 @@ function Numpad(props) {
 
   return (
     <Grid centered>
-      <Grid.Row>
-        <Header as="h2" inverted>
-          <Icon name="lock" size="massive" inverted />
-          {props.heading}
-        </Header>
+      <Grid.Row textAlign="center">
+        <Grid.Column textAlign="center">
+          <Header as="h2" inverted>
+            <Icon name="lock" size="massive" inverted />
+            {props.heading}
+          </Header>
+          <Alert hideError={props.hideError} content={props.content} />
+        </Grid.Column>
       </Grid.Row>
       <Grid.Row textAlign="center">
         <Grid.Column width="7">

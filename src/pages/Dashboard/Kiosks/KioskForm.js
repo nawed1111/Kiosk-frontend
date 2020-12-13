@@ -1,11 +1,10 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 
-import { AuthContext } from "../../../context/auth-context";
+import axios from "../../../util/axios";
+
 import NewInstrumentForm from "../../Interface/Instrument/NewInstrumentForm";
 
 function KioskForm(props) {
-  const auth = useContext(AuthContext);
-  const axios = auth.getAxiosInstance;
   const editkiosk = props.kiosk;
   // console.log("Kiosk: ", editkiosk);
   const [newKiosk, setNewKiosk] = useState({
@@ -44,29 +43,33 @@ function KioskForm(props) {
     // console.log(newKiosk);
     event.preventDefault();
 
-    let method;
-
-    if (event.target.name === "create") method = "PUT";
-    else if (event.target.name === "update") method = "PATCH";
-
     const { id, instruments, rfreader } = newKiosk;
 
     if (!id || instruments.length === 0) {
       return window.alert("Mandatory Fields cannot be blank");
     }
 
+    let method, url;
+
+    if (event.target.name === "create") {
+      method = "POST";
+      url = `/api/kiosks`;
+    } else if (event.target.name === "update") {
+      method = "PATCH";
+      url = `/api/kiosks/${id}`;
+    }
+
     try {
-      await axios(
-        `/api/kiosks/${id}`,
-        { kioskId: id, instruments, rfreader },
-        {
-          method: method,
-          headers: {
-            Authorization: "Bearer " + auth.accessToken,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const res = await axios({
+        method,
+        url,
+        data: {
+          kioskId: id,
+          instruments,
+          rfreader,
+        },
+      });
+      console.log(res.data);
       props.goBack();
     } catch (error) {
       console.log(error.response.data.message);
@@ -76,12 +79,7 @@ function KioskForm(props) {
   const searchInstrumentClickHandler = async () => {
     try {
       const response = await axios.get(
-        `/api/instruments/instrument/${instrumentId}`,
-        {
-          headers: {
-            Authorization: "Bearer " + auth.accessToken,
-          },
-        }
+        `/api/instruments/instrument/${instrumentId}`
       );
 
       setNewInstrument({ open: true, instrument: response.data.instrument });

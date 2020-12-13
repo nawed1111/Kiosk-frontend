@@ -1,54 +1,42 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
+import axios from "../../../util/axios";
+
 import FilledInstrument from "./FilledInstrument";
 import Loading from "../../../components/Loader/Loading";
+import Alert from "../../../components/Alert/Alert";
 
-import { AuthContext } from "../../../context/auth-context";
-import { Button, Grid } from "semantic-ui-react";
+import { Button, Confirm, Grid } from "semantic-ui-react";
 
 function RemoveSamplesFromInstrument(props) {
-  const auth = useContext(AuthContext);
-  const axios = auth.getAxiosInstance;
   const [loading, setloading] = useState(false);
+  const [open, setopen] = useState(false);
+  const [hideError, sethideError] = useState(true);
 
-  /*************Bug not catching error*************/
   const removeSampleFromInstrumentClickHandler = async () => {
-    const response = window.confirm("Are you sure?");
-    if (response) {
-      setloading(true);
-      try {
-        await axios
-          .patch(
-            "/api/test/post-sample-removal",
-            {
-              testId: props.loadedInstrumentInfo.test._id,
-            },
-            {
-              headers: {
-                Authorization: "Bearer " + auth.accessToken,
-                "Content-Type": "application/json",
-              },
-            }
-          )
-          .catch((err) => {
-            if (err.response.status === 403) {
-              console.error("Errror.....", err);
-              setloading(false);
-              window.alert("Test still running");
-            }
-            throw err;
-          });
+    const { timestamp, duration } = props.loadedInstrumentInfo.test;
+    const date = new Date(timestamp + duration * 60 * 1000);
+    const difference = +date - +new Date();
+    if (difference > 0) return sethideError(false);
 
-        setloading(false);
-        props.updateHomePage(null);
-      } catch (error) {
-        console.error("Errror.....", error);
-        setloading(false);
-      }
+    setloading(true);
+
+    try {
+      await axios.patch("/api/test/post-sample-removal", {
+        testId: props.loadedInstrumentInfo.test._id,
+      });
+
+      setloading(false);
+      props.updateInstrumentStatus();
+      props.updateHomePage(null);
+    } catch (err) {
+      setloading(false);
+      if (err.response) return console.log(err.response.data.error.message);
+      window.alert("Possible error- Server not connected! Contact admin");
     }
   };
 
   const onCancelClickHandler = () => {
-    props.stayAtLoadedInstrumentPage({ status: false });
+    props.stayAtLoadedInstrumentPage();
   };
 
   return loading ? (
@@ -56,6 +44,14 @@ function RemoveSamplesFromInstrument(props) {
   ) : (
     <Grid centered>
       <FilledInstrument loadedInstrumentInfo={props.loadedInstrumentInfo} />
+
+      <Grid.Row>
+        <Alert
+          hideError={hideError}
+          content="You can not remove samples as instrument is still running test."
+        />
+      </Grid.Row>
+
       <Grid.Row columns="2" textAlign="center">
         <Grid.Column textAlign="right">
           <Button
@@ -74,10 +70,22 @@ function RemoveSamplesFromInstrument(props) {
             color="red"
             size="large"
             circular
-            onClick={removeSampleFromInstrumentClickHandler}
+            onClick={() => setopen(true)}
           >
             Remove
           </Button>
+          <Confirm
+            open={open}
+            content="Please confirm if you want to remove samples from the instrument?"
+            cancelButton="Cancel"
+            confirmButton="Yes"
+            onCancel={() => setopen(false)}
+            size="mini"
+            onConfirm={() => {
+              setopen(false);
+              removeSampleFromInstrumentClickHandler();
+            }}
+          />
         </Grid.Column>
       </Grid.Row>
     </Grid>

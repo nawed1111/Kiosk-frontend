@@ -1,10 +1,8 @@
-import React, { useContext } from "react";
-import { AuthContext } from "../../../context/auth-context";
+import React from "react";
+import axios from "../../../util/axios";
 
 function UserForm(props) {
   const editUser = props.user;
-  const auth = useContext(AuthContext);
-  const axios = auth.getAxiosInstance;
 
   const userOperationHandler = async (event) => {
     event.preventDefault();
@@ -22,17 +20,22 @@ function UserForm(props) {
     } = event.target;
     if (password.value !== confirmp.value)
       return window.alert("Passwords donot match!");
-    let method;
+    let method, url;
 
-    if (editUser.userid) method = "PATCH";
-    else method = "POST";
+    if (editUser.userid) {
+      method = "PATCH";
+      url = `/api/auth/admin/${userid}`;
+    } else {
+      method = "POST";
+      url = `/api/auth/admin`;
+    }
 
     console.log(method);
 
     try {
       const response = await axios({
-        method: method,
-        url: `/api/auth/admin/${userid.value}`,
+        method,
+        url,
         data: {
           userid: userid.value,
           fname: fname.value,
@@ -44,7 +47,6 @@ function UserForm(props) {
           mobno: Number(mob.value),
         },
         headers: {
-          Authorization: "Bearer " + auth.accessToken,
           "Content-Type": "application/json",
         },
       });

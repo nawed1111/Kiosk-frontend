@@ -1,15 +1,15 @@
-import React, { useContext, useState } from "react";
-import { AuthContext } from "../../context/auth-context";
-import Numpad from "./Numpad";
+import React, { useState } from "react";
+import axios from "../../util/axios";
+
 import { Header, Image } from "semantic-ui-react";
 
+import Numpad from "../../components/Pin/Numpad";
 import Loading from "../../components/Loader/Loading";
 
 import signSuccessfullImage from "../../assets/images/sign-successfull.png";
 
 const EnterPin = (props) => {
-  const auth = useContext(AuthContext);
-  const axios = auth.getAxiosInstance;
+  const [hideError, sethideError] = useState(true);
   const [status, setstatus] = useState({
     loading: false,
     signed: false,
@@ -40,7 +40,7 @@ const EnterPin = (props) => {
       }
 
       setstatus({ loading: false, signed: true });
-      await timeout(2000);
+      await timeout(1500);
       setstatus({ ...status, signed: false });
 
       props.tokenHandler({
@@ -49,7 +49,9 @@ const EnterPin = (props) => {
       });
     } catch (err) {
       setstatus({ ...status, loading: false });
-      alert(err.response.data.error.message);
+      console.log(err);
+      if (err.response) return sethideError(false);
+      window.alert("Possible error- Server not connected! Contact admin");
     }
   };
 
@@ -67,6 +69,9 @@ const EnterPin = (props) => {
           heading="Enter 4-digit PIN"
           onpinSubmit={(value) => pinSubmitHandler(value)}
           cancel={props.onCancel}
+          hideError={hideError}
+          content="Invalid Pin! Please try again."
+          sethideError={() => sethideError(true)}
         />
       )}
     </>

@@ -1,5 +1,6 @@
 import React, { useContext, useState } from "react";
 import { Redirect } from "react-router-dom";
+import axios from "../../util/axios";
 
 import Kiosks from "./Kiosks/Kiosks";
 import Admin from "./Admins/Admin";
@@ -10,16 +11,17 @@ import LoginForm from "../../components/Login/LoginForm";
 
 const DashboardPage = () => {
   const auth = useContext(AuthContext);
-  auth.setInterceptors();
-  const axios = auth.getAxiosInstance;
   const [selectedTab, setSelectedTab] = useState(null);
 
   const logoutHandler = async () => {
     try {
-      await auth.getAxiosInstance.delete(
+      await axios.delete(
         `/api/auth/logout`,
         {
-          data: { refreshToken: auth.refreshToken },
+          data: {
+            refreshToken: JSON.parse(localStorage.getItem("token"))
+              .refreshToken,
+          },
         },
         {
           headers: {
@@ -31,6 +33,8 @@ const DashboardPage = () => {
       window.location.reload();
     } catch (error) {
       console.log(error);
+      auth.logout();
+      window.location.reload();
     }
   };
 
@@ -69,7 +73,7 @@ const DashboardPage = () => {
               <p />
               <h1>Dashboard</h1>
               <button onClick={() => setSelectedTab("kiosks")}>Kiosks</button>
-              <button onClick={() => setSelectedTab("users")}>Users</button>
+              <button onClick={() => setSelectedTab("users")}>Admins</button>
               {selectedTab === "kiosks" ? (
                 <Kiosks />
               ) : selectedTab === "users" ? (

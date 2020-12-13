@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
+import axios from "../../../util/axios";
 import { AuthContext } from "../../context/auth-context";
 
 function InstrumentProperties(props) {
@@ -12,13 +13,8 @@ function InstrumentProperties(props) {
   useEffect(() => {
     async function helper() {
       try {
-        const response = await auth.getAxiosInstance.get(
-          `/api/instruments/instrument/${props.instrument.instrumentid}`,
-          {
-            headers: {
-              Authorization: "Bearer " + auth.accessToken,
-            },
-          }
+        const response = await axios.get(
+          `/api/instruments/instrument/${props.instrument.instrumentid}`
         );
         console.log("Response: ", response);
         setinstrument(response.data.instrument);

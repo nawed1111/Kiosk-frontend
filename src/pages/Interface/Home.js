@@ -2,9 +2,10 @@ import React, { useState, useEffect, useContext } from "react";
 
 import { AuthContext } from "../../context/auth-context";
 
+import axios from "../../util/axios";
+
 import InstrumentPage from "./Instrument/Instrument";
 import RemoveSamplesFromInstrumentPage from "./Instrument/RemoveSamplesFromInstrument";
-// import InstrumentProperties from "../../components/Instrument/InstrumentProperties";
 import RunningTests from "./Instrument/RunningTests";
 import Loading from "../../components/Loader/Loading";
 
@@ -24,9 +25,9 @@ const style = {
 function Home() {
   const _KIOSK_ID = localStorage.getItem("kioskId");
   const auth = useContext(AuthContext);
-  auth.setInterceptors();
+
+  const [rerender, setrerender] = useState(false);
   const [instrument, setInstrument] = useState(null);
-  const [selected, setSelected] = useState(false);
   const [loading, setloading] = useState(false);
 
   const [instrumentsofKiosk, setInstrumentsOfKiosk] = useState({
@@ -34,32 +35,35 @@ function Home() {
     runningTests: [],
   });
 
-  const [openLoadedInstrument, setLoadedIntrument] = useState({
-    status: false,
+  const [openInstrument, setopenInstrument] = useState({
+    loaded: false,
+    empty: false,
     instrumentId: null,
   });
 
-  // const instrumentHandler = (data) => {
-  //   setInstrument(data);
-  // };
-
   const openLoadedInstrumentHandler = (instrumentId) => {
-    setLoadedIntrument({ status: !openLoadedInstrument.status, instrumentId });
-    setSelected(false);
+    setopenInstrument({
+      loaded: !openInstrument.loaded,
+      empty: false,
+      instrumentId,
+    });
     setInstrument(null);
   };
   const onInstrumentClickHandler = (data) => {
     setInstrument(data);
-    setSelected(true);
+    setopenInstrument({ ...openInstrument, empty: true });
   };
 
   const logoutHandler = async () => {
     setloading(true);
     try {
-      await auth.getAxiosInstance.delete(
+      await axios.delete(
         `/api/auth/logout`,
         {
-          data: { refreshToken: auth.refreshToken },
+          data: {
+            refreshToken: JSON.parse(localStorage.getItem("token"))
+              .refreshToken,
+          },
         },
         {
           headers: {
@@ -72,46 +76,38 @@ function Home() {
       window.location.reload();
     } catch (error) {
       console.log(error);
-      // setloading(false);
+      setloading(false);
       auth.logout();
       window.location.reload();
     }
   };
 
   const gobackToHomePage = () => {
-    setSelected(false);
+    setopenInstrument({ ...openInstrument, empty: false });
     setInstrument(null);
-    if (openLoadedInstrument.status)
-      setLoadedIntrument({ status: !openLoadedInstrument.status });
   };
 
   useEffect(() => {
-    if (!selected) {
-      async function helper() {
-        setloading(true);
-        try {
-          const response = await auth.getAxiosInstance.get(
-            `/api/instruments/${_KIOSK_ID}`,
-            {
-              headers: {
-                Authorization: "Bearer " + auth.accessToken,
-              },
-            }
-          );
-          setloading(false);
-          setInstrumentsOfKiosk({
-            instruments: response.data.instruments,
-            runningTests: response.data.testsRunning,
-          });
-        } catch (err) {
-          setloading(false);
-          alert(err.response.data.message);
-          console.log(err.response.data.message);
-        }
+    async function helper() {
+      setloading(true);
+      try {
+        const response = await axios.get(`/api/instruments/${_KIOSK_ID}`);
+        setloading(false);
+
+        setInstrumentsOfKiosk({
+          instruments: response.data.instruments,
+          runningTests: response.data.testsRunning,
+        });
+      } catch (err) {
+        setloading(false);
+
+        console.log(err);
+        if (!err.response)
+          window.alert("Possible error- Server not connected! Contact admin");
       }
-      helper();
     }
-  }, [auth, _KIOSK_ID, selected, openLoadedInstrument]);
+    helper();
+  }, [_KIOSK_ID, rerender]);
 
   const renderInstruments = instrumentsofKiosk.instruments.map(
     (instrument, index) => (
@@ -168,7 +164,7 @@ function Home() {
 
       <Grid.Row centered>
         <Header as="h2" inverted>
-          TEST RUNNING IN: {instrumentsofKiosk.runningTests.length} INSTRUMENT/S
+          TEST RUNNING IN: {instrumentsofKiosk.runningTests.length} INSTRUMENTS
         </Header>
       </Grid.Row>
       <Grid.Row centered columns={3}>
@@ -206,21 +202,28 @@ function Home() {
               </Grid.Column>
             </Grid.Row>
           </Grid>
-          {selected ? (
+          {openInstrument.empty ? (
             <InstrumentPage
               instrument={instrument}
               deSelect={gobackToHomePage}
+              updateInstrumentStatus={() => setrerender(!rerender)}
             />
-          ) : openLoadedInstrument.status ? (
+          ) : openInstrument.loaded ? (
             <RemoveSamplesFromInstrumentPage
               loadedInstrumentInfo={{
                 test: instrumentsofKiosk.runningTests.find(
-                  (test) =>
-                    test.instrumentId === openLoadedInstrument.instrumentId
+                  (test) => test.instrumentId === openInstrument.instrumentId
                 ),
               }}
-              stayAtLoadedInstrumentPage={setLoadedIntrument}
+              stayAtLoadedInstrumentPage={() =>
+                setopenInstrument({
+                  ...openInstrument,
+                  loaded: false,
+                  empty: false,
+                })
+              }
               updateHomePage={openLoadedInstrumentHandler}
+              updateInstrumentStatus={() => setrerender(!rerender)}
             />
           ) : (
             HomePage

@@ -1,15 +1,17 @@
 import React, { useState, useContext } from "react";
 import { AuthContext } from "../../context/auth-context";
-import { Grid, Image, Header } from "semantic-ui-react";
-import Numpad from "./Numpad";
+import axios from "../../util/axios";
 
+import { Grid, Image, Header } from "semantic-ui-react";
+
+import Numpad from "../../components/Pin/Numpad";
 import Loading from "../../components/Loader/Loading";
 import signSuccessfullImage from "../../assets/images/sign-successfull.png";
 
 function SetupPin(props) {
   const auth = useContext(AuthContext);
-  const axios = auth.getAxiosInstance;
   const [pin, setPin] = useState("");
+  const [hideError, sethideError] = useState(true);
   const [status, setstatus] = useState({
     loading: false,
     signed: false,
@@ -20,7 +22,7 @@ function SetupPin(props) {
   };
 
   const submitClickHandler = async (value) => {
-    if (pin !== value) return window.alert("Pin do not match");
+    if (pin !== value) return sethideError(false);
 
     setstatus({ ...status, loading: true });
 
@@ -51,13 +53,14 @@ function SetupPin(props) {
       });
       props.setupPin();
     } catch (error) {
-      console.log(error);
+      if (error.response) return console.log(error);
+      window.alert("Possible error- Server not connected! Contact admin");
     }
   };
 
   return (
-    <Grid>
-      <Grid.Column>
+    <Grid centered>
+      <Grid.Column textAlign="center">
         <Header inverted as="h1">
           Welcome to Kiosk. Please set up your pin
         </Header>
@@ -71,12 +74,18 @@ function SetupPin(props) {
             heading="Enter 4-digit PIN"
             onpinSubmit={(value) => setPin(value)}
             cancel={() => props.setupPin()}
+            hideError={true}
+            content=""
+            sethideError={() => sethideError(true)}
           />
         ) : (
           <Numpad
             heading="Re-Enter 4-digit PIN"
             onpinSubmit={(value) => submitClickHandler(value)}
             cancel={() => props.setupPin()}
+            hideError={hideError}
+            content="Pin mismatch. Please re-enter your pin Or scan your card to start again"
+            sethideError={() => sethideError(true)}
           />
         )}
       </Grid.Column>

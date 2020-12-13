@@ -9,27 +9,23 @@ import StartPage from "./pages/Interface/Start";
 import ErrorPage from "./pages/Interface/Error";
 
 import { useAuth } from "./hooks/auth-hook";
-import { useAxios } from "./hooks/authService";
+// import { useAxios } from "./hooks/authService";
 import DashboardPage from "./pages/Dashboard/Dashboard";
 
 import { Container, Segment } from "semantic-ui-react";
 
 function App() {
-  const { accessToken, refreshToken, user, login, logout } = useAuth();
-  const { setInterceptors, getAxiosInstance } = useAxios();
+  const { token, user, login, logout } = useAuth();
+  // const { setInterceptors, getAxiosInstance } = useAxios();
 
   return (
     <MediaContextProvider>
       <AuthContext.Provider
         value={{
-          accessToken,
-          refreshToken,
           user,
-          isLoggedIn: !!accessToken,
+          isLoggedIn: !!token,
           login,
           logout,
-          getAxiosInstance,
-          setInterceptors,
         }}
       >
         <Container textAlign="center">

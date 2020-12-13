@@ -4,9 +4,10 @@ import { AuthContext } from "../../context/auth-context";
 import { getSocket } from "../../util/socket";
 
 import HomePage from "../Interface/Home";
-import EnterPin from "../../components/Pin/EnterPin";
-import SetupPin from "../../components/Pin/SetupPin";
+import EnterPin from "./EnterPin";
+import SetupPin from "./SetupPin";
 import Scan from "../../components/Scan/Scan";
+import Alert from "../../components/Alert/Alert";
 
 import { Icon, Grid, Header } from "semantic-ui-react";
 
@@ -15,6 +16,7 @@ function Login() {
   const auth = useContext(AuthContext);
   const [setupPin, setSetupPin] = useState(false);
   const [displayPin, setdisplayPin] = useState(false);
+  const [hideError, sethideError] = useState(true);
 
   const tokenHandler = (data) => {
     if (!auth.isLoggedIn) {
@@ -63,11 +65,15 @@ function Login() {
   useEffect(() => {
     const socket = getSocket();
 
-    // socket.emit("joinAuthRoom", _KIOSK_ID);
+    socket.on("connect", () => {
+      socket.emit("joinAuthRoom", _KIOSK_ID);
+      console.log("Application server connected!");
+    });
 
     socket.on("jwttoken", (data) => {
       fetchedUser.current = data.userid;
-
+      sethideError(true);
+      if (data.NotALimsUser) return sethideError(false);
       if (data.displayPin) setdisplayPin(true);
       else if (data.setupPin) {
         setSetupPin(true);
@@ -83,16 +89,11 @@ function Login() {
       // });
     });
 
-    socket.on("connect", () => {
-      socket.emit("joinAuthRoom", _KIOSK_ID);
-      console.log("Application server connected!");
-    });
-
     return () => socket.off("joinAuthRoom");
   }, [_KIOSK_ID]);
 
   const loginPage = (
-    <Grid padded centered>
+    <Grid centered>
       <Grid.Row>
         <Header inverted style={{ fontFamily: "Roboto", fontSize: "40px" }}>
           {_KIOSK_ID.toUpperCase()}
@@ -100,6 +101,13 @@ function Login() {
       </Grid.Row>
       <Grid.Row>
         <Scan name="BADGE CARD" hideButton="true" />
+      </Grid.Row>
+      <Grid.Row>
+        <Alert
+          hideError={hideError}
+          content={` ${fetchedUser.current} is not authorized user to use the application. 
+          Please contact system administrator.`}
+        />
       </Grid.Row>
       <Grid.Row>
         <Icon

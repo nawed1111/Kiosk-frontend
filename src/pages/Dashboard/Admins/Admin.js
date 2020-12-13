@@ -1,10 +1,9 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
-import { AuthContext } from "../../../context/auth-context";
+import axios from "../../../util/axios";
 import AdminForm from "./AdminForm";
 
 function Users() {
-  const auth = useContext(AuthContext);
   const [users, setUsers] = useState([]);
 
   const [selectedUser, setSelectedUser] = useState({});
@@ -18,21 +17,14 @@ function Users() {
   useEffect(() => {
     async function helper() {
       try {
-        const response = await auth.getAxiosInstance.get(
-          "/api/auth/admin-list",
-          {
-            headers: {
-              Authorization: "Bearer " + auth.accessToken,
-            },
-          }
-        );
+        const response = await axios.get("/api/auth/admin-list");
         setUsers(response.data.users);
       } catch (error) {
         console.log(error.response);
       }
     }
     helper();
-  }, [auth]);
+  }, []);
 
   const renderUsers = users.map((user, index) => (
     <div key={`${user.userid}${index}`}>

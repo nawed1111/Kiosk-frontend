@@ -1,11 +1,9 @@
-import React, { useEffect, useContext, useState } from "react";
-
-import { AuthContext } from "../../../context/auth-context";
+import React, { useEffect, useState } from "react";
+import axios from "../../../util/axios";
 
 import KioskForm from "./KioskForm";
 
 function Kiosks() {
-  const auth = useContext(AuthContext);
   const [kiosks, setKiosks] = useState([]);
   const [selectedKiosk, setSelectedKiosk] = useState({
     kioskId: "",
@@ -19,14 +17,7 @@ function Kiosks() {
     let page = 1;
     async function helper() {
       try {
-        const response = await auth.getAxiosInstance.get(
-          `/api/kiosks?page=${page}`,
-          {
-            headers: {
-              Authorization: "Bearer " + auth.accessToken,
-            },
-          }
-        );
+        const response = await axios.get(`/api/kiosks?page=${page}`);
 
         setKiosks(response.data.kiosks);
       } catch (error) {
@@ -34,7 +25,7 @@ function Kiosks() {
       }
     }
     helper();
-  }, [auth, kioskOperation]);
+  }, [kioskOperation]);
 
   const renderKiosks = kiosks.map((kiosk, index) => (
     <div key={kiosk._id}>
